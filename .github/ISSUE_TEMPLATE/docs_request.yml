@@ -1,0 +1,29 @@
+name: Documentation Request
+description: Request new or improved documentation.
+title: "[Docs] "
+labels:
+  - documentation
+body:
+  - type: textarea
+    id: gap
+    attributes:
+      label: Documentation Gap
+      description: What is missing, unclear, stale, or hard to find?
+    validations:
+      required: true
+  - type: textarea
+    id: audience
+    attributes:
+      label: Audience
+      description: Who needs this documentation?
+      placeholder: New contributors, operators, API consumers, support, sales, agents, etc.
+    validations:
+      required: false
+  - type: textarea
+    id: suggested-location
+    attributes:
+      label: Suggested Location
+      description: Where should this live?
+      placeholder: README.md, docs/development.md, docs/runbooks/..., API docs, etc.
+    validations:
+      required: false

@@ -1,0 +1,4 @@
+# Compatibility wrapper for tools that still look for docker-compose.yml.
+# Prefer compose.yml for new edits.
+include:
+  - compose.yml

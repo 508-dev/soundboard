@@ -1,0 +1,141 @@
+[project]
+name = "devkit-python-workspace"
+version = "0.1.0"
+description = "Python workspace for the 508 Devkit template."
+requires-python = ">=3.12"
+dependencies = [
+  "example-api",
+  "example-shared",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+example-api = { workspace = true }
+example-shared = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+  "apps/api",
+  "packages/shared",
+]
+
+[dependency-groups]
+dev = [
+  "coverage>=7.6,<8.0",
+  "httpx>=0.27,<1.0",
+  "mypy>=1.14,<3.0",
+  "pre-commit>=3.7,<5.0",
+  "pytest>=8.3,<10.0",
+  "pytest-asyncio>=1.0,<2.0",
+  "ruff>=0.14,<1.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = [
+  "apps/api/src",
+  "apps/api/tests",
+  "packages/shared/src",
+  "tests",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = [
+  "apps/api/tests",
+  "tests",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = "--tb=short --strict-markers"
+markers = [
+  "integration: requires local infrastructure",
+  "e2e: end-to-end test",
+  "playwright: browser-driven UI test",
+]
+
+[tool.mypy]
+python_version = "3.12"
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = [
+  "apps/api/src",
+  "packages/shared/src",
+]
+files = [
+  "apps/api/src",
+  "apps/api/tests",
+  "packages/shared/src",
+  "tests",
+]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+# Optional alternative type checker examples. Keep one checker as the
+# repository's CI gate, then use the others for editor feedback or migration
+# trials.
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = [
+  "apps/api/src",
+  "apps/api/tests",
+  "packages/shared/src",
+  "tests",
+]
+extraPaths = [
+  "apps/api/src",
+  "packages/shared/src",
+]
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = "warning"
+
+[tool.pyrefly]
+python-version = "3.12"
+project-includes = [
+  "apps/api/src",
+  "apps/api/tests",
+  "packages/shared/src",
+  "tests",
+]
+search-path = [
+  "apps/api/src",
+  "packages/shared/src",
+]
+
+[tool.ty.environment]
+python-version = "3.12"
+root = [
+  "apps/api/src",
+  "packages/shared/src",
+]
+
+[tool.ty.src]
+include = [
+  "apps/api/src",
+  "apps/api/tests",
+  "packages/shared/src",
+  "tests",
+]
+
+[tool.coverage.run]
+source = ["example_api", "example_shared"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]

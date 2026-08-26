@@ -1,0 +1,13 @@
+[project]
+name = "example-shared"
+version = "0.1.0"
+description = "Shared settings and schemas."
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.11,<3.0",
+  "pydantic-settings>=2.14.2,<3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

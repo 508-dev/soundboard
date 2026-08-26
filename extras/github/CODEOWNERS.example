@@ -1,0 +1,15 @@
+# Copy to .github/CODEOWNERS and replace placeholder owners with real users or teams.
+
+/.github/          @ORG/platform
+/docs/             @ORG/docs
+/scripts/          @ORG/devtools
+
+/apps/api/         @ORG/backend
+/apps/web/         @ORG/frontend
+/apps/worker/      @ORG/backend
+
+/packages/shared/  @ORG/platform
+
+# Add narrower ownership only when it reflects real review responsibility.
+# /infra/           @ORG/platform
+# /migrations/      @ORG/backend

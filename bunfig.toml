@@ -1,0 +1,8 @@
+[install]
+# Seven days, in seconds. Bun filters newly published direct and transitive
+# package versions during resolution.
+minimumReleaseAge = 604800
+minimumReleaseAgeExcludes = ["@types/bun", "typescript"]
+
+# New workspaces should prefer isolated installs to avoid phantom dependencies.
+linker = "isolated"

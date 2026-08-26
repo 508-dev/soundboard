@@ -1,0 +1,43 @@
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for starting a discussion. Share enough context for someone else to reproduce, reason about, or answer the question.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to understand or decide?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What have you tried, read, or observed already?
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal Example
+      description: Include a small reproduction, command, request, screenshot, or link when relevant.
+      render: text
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Product behavior
+        - API
+        - Web
+        - Worker or jobs
+        - Local development
+        - Deployment
+        - Other
+    validations:
+      required: false

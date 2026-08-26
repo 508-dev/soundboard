@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+
+# If the repository uses GitHub Discussions, add a project-specific contact link:
+#
+# contact_links:
+#   - name: Questions and support
+#     url: https://github.com/OWNER/REPO/discussions
+#     about: Ask usage questions and discuss ideas here.

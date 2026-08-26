@@ -1,0 +1,33 @@
+name: Convert TODOs To Issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  todo-to-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Convert TODO comments to issues
+        uses: alstr/todo-to-issue-action@v5
+        with:
+          IDENTIFIERS: '[{"name":"TODO","labels":["todo"]},{"name":"FIXME","labels":["bug"]}]'
+          INSERT_ISSUE_URLS: "true"
+
+      - name: Commit issue links
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Link TODO comments to GitHub issues"
+            git push
+          fi

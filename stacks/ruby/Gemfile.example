@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org", cooldown: 7
+
+ruby ">= 3.2"
+
+group :development, :test do
+  gem "rspec", require: false
+  gem "rubocop", require: false
+  gem "rubocop-performance", require: false
+end

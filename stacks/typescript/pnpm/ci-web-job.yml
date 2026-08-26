@@ -1,0 +1,32 @@
+typescript:
+  needs: changes
+  if: needs.changes.outputs.typescript == 'true' || needs.changes.outputs.workflow == 'true'
+  runs-on: ubuntu-latest
+  steps:
+    # This fragment assumes the pnpm variant has generated and committed
+    # pnpm-lock.yaml. Frozen installs fail by design when the lockfile is absent.
+    - uses: actions/checkout@v5
+
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10.33.0
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Biome
+      run: pnpm run lint
+
+    - name: Typecheck
+      run: pnpm run typecheck
+
+    - name: Tests
+      run: pnpm run test
+
+    - name: Build
+      run: pnpm run build

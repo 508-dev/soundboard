@@ -1,0 +1,39 @@
+# 508 Devkit
+
+508 Devkit is an opinionated reference repo of sane defaults and conventions for software projects. It comes from 508.dev practice, but it is meant to be useful outside 508.dev too.
+
+## Start Here
+
+- `README.md`: overview and quickstart.
+- `AGENTS.md`: agent operating instructions.
+- `DECISIONS.md`: decision authority for devkit topology and policy.
+- `MANIFEST.md`: file inventory and template-selection checklist.
+- `docs/pattern-report.md`: source patterns behind the scaffold.
+- `docs/template-proposal.md`: design rationale for included files.
+- `docs/frontend.md`: framework-neutral frontend policy.
+- `docs/github-workflows.md`: GitHub templates and workflow guidance.
+- `docs/github-template.md`: generated-repo cleanup checklist.
+- `docs/supply-chain.md`: dependency safety policy.
+
+## Key Conventions
+
+- Use `uv` for Python workspaces when the Python stack is selected.
+- Check `uv --no-config --version` before adding `exclude-newer = "P7D"`; ask
+  before upgrading uv if the target has a version older than `0.9.17`.
+- Show Bun first for JavaScript examples, but treat pnpm as first-class when a
+  repo or team prefers it.
+- Keep frontend framework choice out of root defaults.
+- Run app services on the host and infrastructure in Docker Compose.
+- Use deterministic worktree ports from `scripts/worktree-ports.sh`.
+- Keep `.context/` gitignored and workspace-local; durable knowledge belongs in tracked docs.
+- Put language/runtime conventions in `stacks/` and opt-in add-ons in `extras/`.
+- Before applying the devkit, use `MANIFEST.md` to produce a selection report
+  covering every top-level path in the devkit and target repo.
+
+## Validation
+
+Use:
+
+```bash
+./scripts/check-all.sh
+```

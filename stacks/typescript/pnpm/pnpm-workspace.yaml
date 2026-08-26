@@ -1,0 +1,8 @@
+packages:
+  - "stacks/typescript"
+
+# Seven days, in minutes. Keep this in pnpm-workspace.yaml for pnpm v10.16+.
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@types/node"
+  - "typescript"
