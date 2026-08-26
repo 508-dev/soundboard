@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "/home/caleb/src/soundboard/.codex/hooks/mnemon/prime.sh",
+            "statusMessage": "Loading Mnemon context",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "/home/caleb/src/soundboard/.codex/hooks/mnemon/stop.sh",
+            "statusMessage": "Checking Mnemon writeback guidance",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "/home/caleb/src/soundboard/.codex/hooks/mnemon/user_prompt.sh",
+            "statusMessage": "Checking Mnemon recall guidance",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
