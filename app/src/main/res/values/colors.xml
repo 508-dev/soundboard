@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Used only by the pre-Compose XML theme (window background before
+         first frame, status bar). All in-app color comes from ui/theme/Color.kt. -->
+    <color name="window_background_light">#FFFBFE</color>
+    <color name="window_background_dark">#141218</color>
+</resources>

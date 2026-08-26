@@ -1,28 +1,35 @@
 # Secrets
 
-Most repos should use environment variables and CI secrets.
+There is exactly one class of secret in this repo: release-signing key
+material, used only when producing a signed release APK (see
+`docs/deployment.md`). The app itself has no API keys, no backend
+credentials, and no runtime configuration — it makes no network calls, so
+there is no `.env` contract here at all.
 
-SOPS is optional. Add it only when the repository needs encrypted files checked into Git, such as shared non-production config or deploy manifests.
+## Release Signing
 
-GitHub secret scanning and push protection should be the first choice when they
-are available for the repository. Use the Gitleaks extra only when maintainers
-also want repo-local CI scanning and are ready to triage historical findings.
+1. Generate a keystore (see the command in `keystore.properties.example`).
+2. Copy `keystore.properties.example` to `keystore.properties` and fill in
+   the real values.
+3. Never commit `keystore.properties` or the keystore file itself — both are
+   gitignored. If either is ever accidentally committed, rotate the signing
+   key (generate a new keystore); scrubbing git history is not sufficient,
+   same as any other leaked credential.
 
-If SOPS is adopted:
+Debug builds (`./gradlew assembleDebug`/`installDebug`) don't need any of
+this — they use Android's auto-generated debug keystore.
 
-1. Copy `.sops.yaml.example` to `.sops.yaml`.
-2. Replace the example Age recipient.
-3. Store encrypted files under `secrets/`.
-4. Document decrypt/edit commands in this file.
+## User Data Is Not Ours To Leak
 
-Do not commit plaintext secrets.
+The app holds URIs pointing at the user's own audio files, plus the read
+grants for them. Treat a user's `sound_library.json` from a bug report as
+personal data: it lists file paths and names from their device. Don't paste
+one into an issue without the user scrubbing it first.
 
 ## Agent Notes
 
-- Replace generic reporting language with the target repo's real private
-  vulnerability channel before shipping public docs.
-- Do not add `.sops.yaml` unless encrypted tracked files are actually needed.
-- Do not add the Gitleaks workflow silently. Secret scanning can be noisy until
-  a baseline and ignore process exist.
-- When a real secret is found, tell maintainers to rotate it. Removing it from
-  git history is not enough.
+- Never print the contents of `keystore.properties` or a keystore file.
+- If a real `keystore.properties` or `.jks`/`.keystore` file shows up staged
+  for commit, stop and flag it rather than committing it.
+- Report a security concern to caleb@508.dev (see `SECURITY.md`), not a
+  public issue.

@@ -1,5 +1,0 @@
-# Optional SOPS policy. Copy to .sops.yaml only when the repo actually stores
-# encrypted config.
-creation_rules:
-  - path_regex: secrets/.*\.enc\.(yaml|json|env)$
-    age: age1replace-with-project-recipient

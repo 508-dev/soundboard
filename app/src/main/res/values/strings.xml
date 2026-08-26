@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Soundboard</string>
+
+    <!-- Main screen -->
+    <string name="add_sound">Add sound</string>
+    <string name="empty_title">No sounds yet</string>
+    <string name="empty_body">Tap + to pick an audio file. It stays where it is — Soundboard only remembers where to find it.</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="unavailable">File unavailable</string>
+    <string name="unavailable_body">Moved, renamed, deleted, or access was revoked.</string>
+
+    <!-- Volume -->
+    <string name="volume_percent">%1$d%%</string>
+    <string name="volume_for">Volume for %1$s</string>
+    <string name="volume_dial_hint">Drag around the dial to set volume</string>
+    <string name="done">Done</string>
+
+    <!-- Long-press options -->
+    <string name="delete">Delete</string>
+    <string name="delete_title">Remove “%1$s”?</string>
+    <string name="delete_message">This removes the sound from your board. The audio file itself is not deleted and stays where it is on your device.</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Playback notification -->
+    <string name="playback_channel_name">Playback</string>
+    <string name="playback_channel_description">Shown while sounds are looping, so playback keeps running in the background.</string>
+    <string name="stop_all">Stop all</string>
+    <plurals name="sounds_playing">
+        <item quantity="one">%d sound playing</item>
+        <item quantity="other">%d sounds playing</item>
+    </plurals>
+</resources>

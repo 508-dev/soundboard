@@ -1,40 +1,41 @@
 # Contributing
 
-This repository is a reference scaffold. Changes should improve conventions that apply across many projects without turning the repo into a product-specific app.
-
-## Principles
-
-- Prefer small, composable defaults over large generated frameworks.
-- Keep root files broadly useful.
-- Put language/runtime conventions in `stacks/` and team-specific, platform-specific, or workflow-heavy choices in `extras/`.
-- Preserve supply-chain cooldowns and committed lockfiles.
-- Update agent-facing guidance when conventions change.
-
 ## Local Checks
 
 Run the narrowest relevant checks while iterating:
 
 ```bash
-./scripts/lint.sh
-./scripts/typecheck.sh
-./scripts/test.sh
+./gradlew ktlintCheck
+./gradlew testDebugUnitTest
 ```
 
 Before opening or updating a PR, run:
 
 ```bash
-./scripts/check-all.sh
+./gradlew check
 ```
+
+`./scripts/lint.sh`, `./scripts/test.sh`, and `./scripts/check-all.sh` are
+thin wrappers around the same `./gradlew` tasks, kept for consistency with
+CI. Use whichever is convenient.
+
+## Checking Audio Changes
+
+`./gradlew check` cannot tell you whether the app makes the right sound.
+Anything touching `audio/` — playback, looping, volume, audio focus, the
+foreground service — needs a manual pass on a real device. `docs/development.md`
+→ "Testing Audio Behavior" lists the scenarios; say in the PR which ones you
+ran.
 
 ## Pull Requests
 
-Use the PR template. Include what changed, why it belongs in the devkit, and how it was validated.
+Use the PR template. Include what changed, why, and how it was validated.
 
-Avoid committing local state such as `.venv`, `node_modules`, caches, raw logs, screenshots, and `.context/artifacts/`.
+Avoid committing local state such as build outputs, `local.properties`,
+`keystore.properties`, `.idea/`, and `.context/`.
 
 ## Agent Notes
 
-- Keep convention changes paired with docs and skill updates.
-- Do not turn stack examples into root defaults without explaining why the
-  convention applies across most projects.
-- Validate both the root template and any stack touched by the change.
+- Keep convention changes paired with docs updates (`docs/`, `README.md`).
+- Validate with `./gradlew check` before treating a change as complete, and
+  be explicit about what a green build does *not* prove for audio changes.

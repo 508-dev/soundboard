@@ -1,47 +1,49 @@
 # Deployment
 
-508 Devkit does not choose a deployment platform by default. Pick the smallest deployment shape that matches the product, team, and operational constraints.
+## Target: F-Droid
 
-## Decision Record
+The goal is a listing on F-Droid (or a comparable FOSS store). F-Droid builds
+the app from source on its own infrastructure using metadata you submit to the
+`fdroiddata` repo — it does not run the APK you build locally. That means:
 
-When applying this devkit to a project, record the deployment decision here:
+- The build must be reproducible from a clean checkout of this repo with
+  `./gradlew assembleRelease` (no manual steps, no network calls during
+  build beyond fetching declared Gradle dependencies).
+- Every dependency must itself be free software (see `docs/tooling.md` →
+  "Free-Software Constraint").
+- F-Droid signs the APK it builds and distributes; the app's own release
+  signing config (`keystore.properties`) is not used for that build.
 
-- Target platform:
-- Services deployed:
-- Database and storage:
-- Secrets management:
-- Preview environment strategy:
-- Rollback strategy:
-- Production health checks:
+Submission process (once the MVP is ready): follow F-Droid's
+["Submit metadata to Fdroiddata"](https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/)
+guide — check current requirements there rather than trusting this doc to
+stay current on F-Droid's own process.
 
-## Common Options
+## Secondary Path: GitHub Releases APK
 
-| Option | Good Fit | Tradeoffs |
-| --- | --- | --- |
-| Fly.io | Small teams that want simple app hosting close to users. | Requires platform-specific config and operational familiarity. |
-| Render | Straightforward web services, workers, and managed databases. | Less control than lower-level infrastructure. |
-| Vercel or Cloudflare Pages | Frontend-first apps and edge-friendly web surfaces. | Backend, worker, and database workflows may need separate hosting. |
-| Kamal | Teams that want Docker deploys to owned servers. | Requires server operations, registry setup, and rollback discipline. |
-| Coolify | Self-hosted platform-style deploys. | Adds a platform to operate and upgrade. |
-| Kubernetes | Larger teams with existing cluster operations. | Too much machinery for most new projects. |
+Until an F-Droid submission is accepted, a signed release APK attached to a
+GitHub Release is a reasonable way to let people side-load the app:
 
-## Workflow Guidance
+1. Generate a keystore and `keystore.properties` locally (see
+   `keystore.properties.example`) — do not commit either.
+2. `./gradlew assembleRelease` produces a signed APK at
+   `app/build/outputs/apk/release/`.
+3. Attach it to a GitHub Release. Communicate the SHA-256 of the APK in the
+   release notes so people can verify what they installed.
 
-Keep deployment workflows platform-specific and explicit. A project should add deploy CI only after the platform is chosen and secrets are configured.
+Release builds run R8 (`isMinifyEnabled`/`isShrinkResources`). Smoke-test a
+release build on a device before publishing — shrinking is the one build
+difference that can break playback without failing the build.
 
-Before enabling automatic production deploys:
+## What's Explicitly Out Of Scope
 
-1. Add a health endpoint or smoke test.
-2. Document required environment variables.
-3. Confirm rollback behavior.
-4. Keep preview deploys separate from production deploys.
-5. Use least-privilege deployment credentials.
+No backend, no server deploy, no environment-specific config, no rollback
+strategy beyond "publish a new version." The app has no network calls at all
+and requests no `INTERNET` permission.
 
 ## Agent Notes
 
-- Do not infer a deployment platform from this devkit. Inspect the target repo,
-  hosting account, and team preference first.
-- Keep deployment workflows out of new repos until secrets and rollback are
-  known.
-- If deployment is undecided, leave the decision record blank rather than
-  copying placeholder platform files.
+- Do not add a deploy CI workflow (auto-publishing to F-Droid or cutting
+  GitHub Releases) without the maintainer explicitly asking — release
+  signing material and F-Droid submission are deliberate, infrequent, human
+  actions here, not something to automate by default.

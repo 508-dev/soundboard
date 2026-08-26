@@ -1,213 +1,116 @@
-# 508 Devkit
+# Soundboard
 
-Last reviewed: 2026-07-05
+An offline Android app for mixing looping sounds. Pick audio files from your
+device, play any number of them at the same time, and set each one's volume
+independently — rain under a fan under a café, at whatever balance you like.
 
-Opinionated sane defaults and conventions for software projects.
+Free software (GPL-3), no account, no network calls, no telemetry.
 
-This is not a scaffolding CLI. It is a reference repo and GitHub template that
-gives agents and humans a shared baseline for how new projects should be shaped:
-repository layout, local development, dependency safety, CI, agent instructions,
-operational memory, and documentation. It comes from 508.dev practice, but it
-is meant to be useful outside 508.dev too.
+## What It Does
 
-Point an agent at this repo when starting or normalizing a project. The agent should inspect the target repo, ask clarifying questions when the product or stack is ambiguous, and then copy or adapt only the conventions that fit.
+- **Add sounds** with the `+` button. The system file picker opens; anything
+  you choose joins the board. The file itself is never copied or moved —
+  Soundboard just remembers where it is.
+- **Play any combination at once.** Each row has its own play/pause toggle,
+  and sounds loop until you stop them. Tapping anywhere on a row toggles it
+  too.
+- **Set each sound's volume** by tapping its percentage, then dragging around
+  the dial. The percentage is *relative*: your device's volume keys still move
+  the whole mix together, and each sound keeps its balance within it.
+- **Keeps playing in the background** with the screen off. A notification shows
+  how many sounds are running and offers "Stop all".
+- **Remove a sound** by long-pressing its row and choosing Delete. This only
+  takes it off the board — your audio file is left exactly where it is.
 
-## What It Captures
+## Requirements
 
-- Agent-native instructions for Codex, Claude Code, Cursor, and future agents.
-- Gitignored workspace-local `.context/` conventions for Conductor and agents.
-- Bun and pnpm as first-class JavaScript package manager examples, with Bun
-  shown first.
-- Optional `uv` Python workspace conventions.
-- Optional Ruby/Rails/Rack conventions.
-- Dependency cooldowns for Bun, pnpm, uv, and Bundler.
-- Host-run development services.
-- Docker Compose examples for local infrastructure such as databases and
-  caches.
-- Deterministic worktree ports.
-- Framework-neutral frontend conventions.
-- `.worktreeinclude` for copying local-only env files into sibling worktrees.
-- `.dockerignore` for small, secret-safe Docker build contexts.
-- GitHub PR, issue, and CI hygiene.
-- Security scanning and dependency update policy.
-- Pydantic settings/schema and Alembic migration examples for Python services.
-- Drizzle ORM examples for TypeScript services.
-- Ruff, MyPy, Pytest, Biome, and Vitest.
-- Optional SOPS documentation without forcing SOPS into every repo.
+- Android 8.0 (API 26) or newer.
+- Audio files already on your device or reachable through a document provider.
 
 ## Quickstart
 
-### Create A New Repository
-
-Use GitHub's `Use this template` button to create a new repository from
-`508-dev/508-devkit`.
-
-GitHub templates copy the default-branch file tree. Treat the generated
-repository as a bootstrap workspace: the first PR should select the root
-hygiene files, stacks, extras, docs, and workflows that fit the product, then
-delete the rest.
-
-Recommended first prompt in the generated repo:
-
-```text
-This repository was generated from 508 Devkit. Do a template selection pass:
-use MANIFEST.md to produce a selection report before editing, covering every
-top-level path in the devkit and this repo with adopt/adapt/skip/delete/defer
-and a one-line reason. Then keep only the root hygiene, stacks, extras, docs,
-and workflows that fit this project, delete the rest, rename all devkit/example
-identifiers, and run the narrowest relevant checks.
+```bash
+git clone <this repo>
+cd soundboard
+./gradlew installDebug     # with a device connected or an emulator running
 ```
 
-See `docs/github-template.md` for the cleanup checklist.
+Or open the repo root in Android Studio and hit Run. First-time setup and the
+JDK note for CLI builds are in [`docs/development.md`](docs/development.md).
 
-### Normalize An Existing Repository
+## Tooling
 
-Use the repo directly as a reference:
+Kotlin + Jetpack Compose, single Gradle module, no backend.
 
-```text
-Use https://github.com/508-dev/508-devkit or a local checkout of it as the
-project bootstrap reference.
-Inspect my target repo, ask any necessary questions, then apply the relevant conventions.
-```
+| Component | Version |
+| --- | --- |
+| Android Gradle Plugin | 9.2.0 |
+| Gradle | 9.4.1 |
+| Kotlin | 2.3.20 |
+| Compose BOM | 2026.08.00 |
+| Media3 (ExoPlayer) | 1.11.0 |
+| DataStore | 1.2.1 |
+| minSdk / targetSdk / compileSdk | 26 / 36 / 37 |
 
-Or install/use the bundled agent skill from this repo:
+Full table and pinning policy: [`docs/tooling.md`](docs/tooling.md).
 
-```text
-Install the skill from https://raw.githubusercontent.com/508-dev/508-devkit/main/skills/508-devkit/SKILL.md
-or from skills/508-devkit/SKILL.md in a local checkout.
-Run it as /508-devkit, /bootstrap-project, or whatever command name your agent client assigns.
-```
-
-Expected agent behavior:
-
-- Inspect the target repo before editing.
-- Use `MANIFEST.md` to produce a selection report before editing. Cover every
-  top-level path in the devkit and the target repo with an adopt, adapt, skip,
-  delete, or defer decision and a one-line reason.
-- Ask about product shape, deployment target, data stores, and language/runtime choices when those are unclear.
-- Automatically pick up existing conventions when the repo already has them.
-- Prefer the devkit defaults for new projects unless there is a clear reason to choose a stack or extra.
-- Run the narrowest relevant checks before calling the bootstrap complete.
-
-For this repo itself:
+## Checks
 
 ```bash
-bun install --frozen-lockfile
-./scripts/check-all.sh
-./scripts/dev.sh
+./gradlew check            # ktlint + unit tests + Android lint
+./gradlew assembleDebug    # ...and package the APK
 ```
 
-## Layout
+Unit tests cover the pure logic — board mutations, persistence and its
+corruption handling, and the volume dial's angle→percent mapping. Playback,
+mixing, audio focus, and the foreground service need a real device; the manual
+pass is written up in
+[`docs/development.md`](docs/development.md#testing-audio-behavior).
 
-```text
-AGENTS.md      Canonical agent operating instructions
-MANIFEST.md    File inventory and template-selection checklist
-DECISIONS.md   Decision authority for devkit topology and policy
-docs           Durable project documentation
-extras         Optional workflow, deployment, and support add-ons
-scripts        Stable human/agent entrypoints
-skills         Optional project-local agent skills
-stacks         Language/runtime convention packs
-```
+## How It Works
 
-## Read Next
+Four small layers:
 
-1. Read `DECISIONS.md`.
-2. Read `MANIFEST.md`.
-3. Read `docs/github-template.md` when starting from GitHub's template button.
-4. Read `docs/tooling.md`.
-5. Read `docs/frontend.md`.
-6. Read `docs/pattern-report.md` and `docs/template-proposal.md` when you need
-   devkit design history.
-7. Copy `.env.example` to `.env`.
-8. Run `./scripts/worktree-ports.sh env`.
-9. Run `./scripts/docker-compose.sh up -d postgres redis`.
-10. Run `./scripts/dev.sh`.
+- **`data/`** — the board is one JSON document (DataStore). `SoundLibrary`
+  holds every mutation as a pure function, so the list logic tests without an
+  Android runtime. `SoundRepository` also owns the Storage Access Framework
+  read grants.
+- **`audio/`** — `SoundboardEngine` runs one ExoPlayer per sound, which is what
+  makes simultaneous, independently-mixed, gaplessly-looping playback work.
+  Audio focus is requested once for the whole app rather than per player.
+  `PlaybackService` is a foreground service that exists only to keep the
+  process alive and show the notification.
+- **`ui/`** — one screen, a Compose list of cards, plus the custom `Canvas`
+  volume dial.
+- **`SoundboardApp`** — the composition root. No DI framework.
 
-The port helper's `env` command is the print-only URL/port mode. It prints
-`WEB_URL` first, followed by `WEB_PORT` and the rest of the assigned worktree
-ports, so coding orchestrators that scan startup output for a URL open the web
-surface first.
+The reasoning behind each of those, and the options that were rejected, is in
+[`DECISIONS.md`](DECISIONS.md). Read it before changing anything under
+`audio/` — the threading and audio-focus rules are easy to break with a change
+that compiles cleanly.
 
-If a stale same-worktree dev process is still holding the web port, rerun with:
+## Repository Layout
 
-```bash
-./scripts/dev.sh --reclaim-ports
-```
+| Path | What |
+| --- | --- |
+| `app/` | The single Gradle module; all app code. |
+| `docs/` | Development, tooling, deployment, security, supply-chain docs. |
+| `scripts/` | Thin `./gradlew` wrappers used by CI and locally. |
+| `extras/github/` | Opt-in GitHub hygiene (CODEOWNERS, gitleaks, dependency review). |
+| `SPEC.md` | The MVP product spec. |
+| `DECISIONS.md` | Architecture decisions and their reasoning. |
+| `AGENTS.md` | Operating instructions for AI agents working in this repo. |
+| `MANIFEST.md` | Inventory of the 508.dev devkit this repo was generated from. |
 
-Port reclaim is opt-in and intentionally narrow: the script checks the listener
-with `lsof` and refuses to kill it unless the process chain looks like this
-worktree's own JS dev server.
+## Privacy
 
-## Worktree And Docker Hygiene
+Everything stays on your device. The app requests no `INTERNET` permission, so
+it cannot phone home even by accident. It never asks for broad storage access
+either — only per-file read permission for the sounds you explicitly pick.
 
-Keep `.worktreeinclude` as a short allowlist of ignored local files that should follow a developer into new sibling worktrees. Typical entries are `.env`, `.env.local`, and `.sops.yaml`; never include generated directories or large state.
+See [`SECURITY.md`](SECURITY.md) for the full data-handling note and how to
+report a vulnerability.
 
-Keep `.dockerignore` broad enough to exclude VCS metadata, agent scratch state, dependencies, caches, logs, and secrets from Docker build contexts. Make exceptions only for committed templates such as `.env.example`.
+## License
 
-Do not commit `.context/`. Conductor creates `.context/` as workspace-local
-agent scratch. Durable project knowledge belongs in normal docs such as
-`docs/tooling.md`, `docs/development.md`, `docs/pattern-report.md`, or
-`README.md`.
-
-## Package Manager Policy
-
-Bun is shown first because it is the author's preference and keeps small
-projects simple, but it is not a universal requirement.
-
-pnpm is first-class for teams or workspaces that already prefer it, need its
-monorepo behavior, or want the broader pnpm ecosystem. If using pnpm, add
-`pnpm-workspace.yaml`, set `minimumReleaseAge: 10080`, and change CI install
-commands to `pnpm install --frozen-lockfile`.
-
-## Pick-And-Choose Stacks And Extras
-
-This repository intentionally includes files that conflict with each other. It
-is a template source, not an installable preset or final generated app.
-
-- `stacks/typescript/`: framework-neutral TypeScript conventions, Drizzle
-  examples, Biome, Vitest.
-- `stacks/python/`: optional Python API/shared-package workspace.
-- `stacks/ruby/`: optional Ruby/Rails/Rack conventions with Bundler cooldown
-  guidance.
-- `stacks/typescript/pnpm/`: pnpm root files and CI fragment for larger TypeScript workspaces.
-- `extras/dev-scripts/`: JS-first script variants and JS implementations of helper scripts.
-- `extras/dockerfiles/`: opt-in Dockerfile examples for deployment parity.
-- `extras/devcontainer/`: opt-in dev container example.
-- `extras/object-storage/`: very opt-in MinIO Compose example for projects
-  that need local S3-compatible storage.
-- `extras/github/`: CODEOWNERS and discussion templates that need project-specific owners or support policy.
-- `extras/todo-to-issue/`: opt-in workflow for turning TODO comments into GitHub issues.
-- `.sops.yaml.example`: optional SOPS starter only for repos that need encrypted files.
-
-Keep root defaults for most new projects: shell wrappers, shell worktree ports,
-and example Compose-managed infra. Select language/runtime stacks such as
-`stacks/typescript/`, `stacks/python/`, or `stacks/ruby/` based on the target
-project. Treat stack files as conventions to adapt, not product code to copy
-blindly. If this repo was used through GitHub's template button, do the same
-selection and pruning before feature work.
-
-## Agent Notes
-
-- Never copy the whole repository into a target project.
-- A GitHub-generated repo starts with the whole file tree by design; make the
-  first project PR a template selection pass that removes irrelevant stacks,
-  extras, workflows, and docs.
-- Start with root hygiene files, then select only the stacks and extras that
-  match the target repo.
-- Treat `stacks/` as peer language/runtime convention packs. TypeScript and
-  Python are examples, not universal defaults. Ruby is available as an
-  opt-in convention pack when the target repo actually uses Ruby.
-- Treat `extras/` as opt-in workflows or deployment helpers that may require
-  repo settings, real owners, or team process.
-- Keep `.context/` gitignored. Promote durable learnings into tracked docs
-  instead of committing agent scratch.
-- Keep worktree port helpers generic. If a workspace orchestrator exposes a
-  reserved port or port block, map it to `WORKTREE_PRIMARY_PORT` or
-  `WORKTREE_PORT_BLOCK_START` outside the helper.
-
-## Skill Interface
-
-The repository is the source of truth. The downloadable skill in `skills/508-devkit/SKILL.md` is the agent-facing interface that explains how to apply these files to a target repo.
-
-Task-shaped skills in `skills/*/SKILL.md` capture repeatable workflows such as migration creation, service creation, context promotion, and CI triage.
+GPL-3.0. See [`LICENSE`](LICENSE).

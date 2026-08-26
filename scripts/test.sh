@@ -1,7 +1,7 @@
-#!/usr/bin/env sh
-set -eu
-
-cd "$(dirname "$0")/.."
-
-# Keep tests behind a stable wrapper for humans, agents, and CI.
-bun run test
+#!/usr/bin/env bash
+# JVM unit tests only. No emulator required. For instrumented tests
+# (androidTest/), use `./gradlew connectedDebugAndroidTest` against a
+# connected device or running emulator.
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+./gradlew testDebugUnitTest

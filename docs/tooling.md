@@ -1,117 +1,95 @@
 # Tooling
 
-The root devkit is language-neutral. Language and runtime conventions live in
-`stacks/`, and optional workflow or deployment add-ons live in `extras/`.
+Single stack: Kotlin + Jetpack Compose + Gradle (Kotlin DSL), Android-only.
+See `DECISIONS.md` for why (Compose over Views, Media3 over MediaPlayer,
+DataStore over Room, no DI framework).
 
-## TypeScript Stack
+## Pinned Versions
 
-Show Bun first for TypeScript repository tooling. It keeps scripts fast and
-simple, but pnpm is also first-class when a repo or team prefers it.
+Tracked in `gradle/libs.versions.toml`. Set 2026-08-26 against then-current
+stable releases, matching the sibling app `emotion-tracker` wherever the two
+overlap:
 
-Required checks for `stacks/typescript`:
+| Component | Version | Notes |
+| --- | --- | --- |
+| Android Gradle Plugin | 9.2.0 | Requires Gradle 9.4.1+, JDK 17. |
+| Gradle (wrapper) | 9.4.1 | `gradle/wrapper/gradle-wrapper.properties`, sha256-verified. |
+| Kotlin | 2.3.20 | |
+| Compose BOM | 2026.08.00 | Pins all `androidx.compose.*` artifact versions together. |
+| Media3 (ExoPlayer) | 1.11.0 | One player per sound; see `DECISIONS.md`. |
+| DataStore | 1.2.1 | Stores the board as a single JSON document. |
+| Lifecycle | 2.11.0 | Includes `lifecycle-runtime-compose` for `collectAsStateWithLifecycle`. |
+| kotlinx.serialization | 1.11.0 | Codec for the persisted `SoundLibrary`. |
+| kotlinx.coroutines | 1.11.0 | |
+| ktlint Gradle plugin | 14.2.0 | `org.jlleitschuh.gradle.ktlint`. |
+| compileSdk | 37 | Android 17. Required by the Compose BOM above. |
+| targetSdk | 36 | One below compileSdk; bump once API 37's behavior changes are reviewed. |
+| minSdk | 26 | Android 8.0 — notification channels and `AudioFocusRequest` natively. |
 
-```bash
-bun run lint
-bun run typecheck
-bun run test
-bun run build
-```
+No KSP and no Room here, unlike the sibling app — see `DECISIONS.md` →
+"DataStore Over Room".
 
-Use pnpm when a workspace or team wants its monorepo tooling, workspace
-controls, or ecosystem compatibility. The pnpm convention files live in
-`stacks/typescript/pnpm/`.
+Bump versions deliberately: Renovate opens PRs against
+`gradle/libs.versions.toml` on a 7-day cooldown (`renovate.json`), which is
+the expected update path. Don't hand-edit versions opportunistically outside
+of that unless fixing something broken. Android lint will report newer
+AGP/Kotlin/Gradle releases as warnings; those warnings are expected and are
+not a reason to bump outside the Renovate flow.
 
-## Python Stack
+**AGP 9+ has built-in Kotlin support.** Do not apply
+`org.jetbrains.kotlin.android` (`kotlin-android`) in `app/build.gradle.kts`
+or the root `build.gradle.kts` — AGP 9.0+ compiles Kotlin itself and applying
+that plugin alongside it is a hard build error, not a warning. The
+`org.jetbrains.kotlin.plugin.compose` and
+`org.jetbrains.kotlin.plugin.serialization` sub-plugins are still applied
+separately as normal — built-in Kotlin only subsumes the base Kotlin-Android
+plugin. JVM target now comes from `android.compileOptions.targetCompatibility`
+directly; there's no separate `kotlin { compilerOptions { jvmTarget ... } }`
+block to set. See <https://developer.android.com/build/migrate-to-built-in-kotlin>.
 
-Use `uv` for Python installs and execution when the target project selects
-`stacks/python`.
-
-Required checks for `stacks/python`:
-
-```bash
-uv sync --locked
-UV_LOCKED=1 uv run ruff check apps packages tests
-UV_LOCKED=1 uv run ruff format --check apps packages tests
-UV_LOCKED=1 uv run mypy
-UV_LOCKED=1 uv run pytest
-```
-
-Keep Python configuration in `pyproject.toml`. The Python stack shows Pydantic
-settings/boundary schemas and Alembic migrations as examples; keep them when
-they fit the target repo and replace them when an existing choice is better.
-
-The Python stack includes example configuration for MyPy, Pyright, Pyrefly, and
-ty, but projects should choose one type checker as the required CI gate.
-Recommended defaults:
-
-- Use Pyrefly for new Python projects that want fast CLI checks and a modern
-  language server, provided the team is comfortable with its monthly release
-  cadence and occasional new diagnostics on upgrade.
-- Use Pyright when the team already standardizes on VS Code/Pylance, wants a
-  mature standards-focused checker, or needs strong cross-editor language
-  server behavior.
-- Keep MyPy when the project relies on MyPy plugins, framework-specific typing
-  behavior, or maximum ecosystem compatibility.
-- Use ty only as an advisory or experimental checker until its beta/0.0.x
-  version policy settles.
-
-When switching the CI gate, update `stacks/python/scripts/typecheck.sh`, add the
-chosen checker to the dev dependency group, and regenerate `uv.lock` with the
-repo's supply-chain cooldown policy in mind.
-
-## Ruby Stack
-
-Use Bundler for Ruby installs and command execution when the target project
-selects `stacks/ruby`.
-
-The Ruby stack is intentionally a convention pack rather than a generated app.
-Copy its `Gemfile.example` to `Gemfile`, generate a project-specific
-`Gemfile.lock` with a compatible Bundler, and add Rails, Rack, Sidekiq, or other
-runtime gems only when the target repo needs them.
-
-Required checks for a typical Ruby project:
+## Required Checks
 
 ```bash
-bundle check
-bundle exec rubocop
-bundle exec rspec
+./gradlew ktlintCheck
+./gradlew testDebugUnitTest
+./gradlew lintDebug
+./gradlew assembleDebug
 ```
 
-Use Rails or Rack conventions when the target repo already has them. The Ruby
-stack intentionally does not make Rails a root default; it provides scripts that
-adapt to `bin/dev`, Rails, Rack, RSpec, or Minitest-style test directories.
+Or all at once: `./gradlew check assembleDebug` (what CI runs; see
+`scripts/check-all.sh`).
 
-When adding Bundler cooldowns, require Bundler `4.0.13` or newer and pin that
-Bundler version in `Gemfile.lock` before handing off the target repo.
+## IDE
+
+Android Studio is the expected IDE — it bundles a matching JDK, the Android
+SDK, platform-tools, and an emulator. Let it manage its own embedded JDK
+(**Settings → Build Tools → Gradle**) rather than pointing it at a system
+`java`. The Gradle daemon's JVM is pinned to Java 25 in
+`gradle/gradle-daemon-jvm.properties`; Android Studio's bundled JBR matches,
+so from the CLI the reliable invocation on a machine whose system JDK differs
+is:
+
+```bash
+JAVA_HOME=/path/to/android-studio/jbr ./gradlew <task>
+```
 
 ## Dependency Safety
 
-Use dependency cooldowns and frozen installs:
+- Renovate: `minimumReleaseAge: "7 days"` (`renovate.json`). Renovate
+  natively understands Gradle version catalogs — no extra config needed for
+  it to open PRs against `gradle/libs.versions.toml`.
+- Gradle wrapper integrity is verified via `distributionSha256Sum` in
+  `gradle/wrapper/gradle-wrapper.properties`. Update both together when
+  bumping the wrapper version.
+- CI builds against the committed wrapper only (no floating Gradle version).
 
-- Bun: `bunfig.toml` sets `minimumReleaseAge = 604800` seconds.
-- uv: optional `exclude-newer = "P7D"` only with uv `0.9.17` or newer. Agents
-  must check `uv --no-config --version` before writing relative cooldowns
-  downstream and ask before upgrading old uv installations.
-- pnpm: `pnpm-workspace.yaml` should set `minimumReleaseAge: 10080` minutes.
-- Bundler: `Gemfile` should use
-  `source "https://rubygems.org", cooldown: 7` when Bundler is `4.0.13` or
-  newer.
-- CI should use locked or frozen installs.
+## Free-Software Constraint (F-Droid)
 
-Regenerate lockfiles when cooldown settings change so CI validates committed
-pins instead of resolving fresh dependency graphs.
-
-## Workflow Permissions
-
-Keep workflow permissions at `contents: read` unless a job explicitly calls PR
-APIs or posts PR comments.
-
-Dependency Review is opt-in through
-`extras/github/dependency-review.yml.example`, not a default hidden behind a
-repository variable. Do not make it run automatically for all public
-repositories with `github.event.repository.private == false`; that reintroduces
-the dependency graph footgun for public repos where the graph is disabled.
-
-Gitleaks is also opt-in through `extras/github/gitleaks.yml.example`. Add it
-only when maintainers want CI secret scanning and are prepared to triage
-historic findings.
+Every dependency this app ships must itself be free software — F-Droid builds
+from source and requires the whole app, transitively, to qualify. In practice:
+stick to AndroidX and Kotlin-stdlib-class libraries. No Google Play Services,
+no Firebase, no closed-source SDKs. `androidx.media3` is Apache-2.0 and
+qualifies. Compose's dynamic color API (`dynamicLightColorScheme`/
+`dynamicDarkColorScheme`, used in `ui/theme/Theme.kt`) is fine — it's a pure
+AndroidX/Compose API with no Play Services dependency, despite the "Material
+You" branding.

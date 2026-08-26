@@ -1,11 +1,6 @@
-#!/usr/bin/env sh
-set -eu
-
-cd "$(dirname "$0")/.."
-
-# Root validation covers the language-neutral wrapper scripts plus the default
-# TypeScript stack. Run stack-local check-all scripts after selecting extras.
-./scripts/lint.sh
-./scripts/typecheck.sh
-./scripts/test.sh
-bun run build
+#!/usr/bin/env bash
+# Everything CI runs: ktlint, Android lint, unit tests, debug assembly.
+# No emulator required.
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+./gradlew check assembleDebug

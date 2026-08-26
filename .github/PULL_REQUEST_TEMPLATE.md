@@ -4,8 +4,12 @@
 
 ## Validation
 
-- [ ] Ran the narrowest relevant checks.
+- [ ] Ran the narrowest relevant checks (`./gradlew check`).
 - [ ] Updated docs or examples when behavior changed.
+- [ ] For changes under `app/src/main/java/dev/co508/soundboard/audio/`:
+      verified on a device. Note which scenarios from
+      `docs/development.md` → "Testing Audio Behavior" were run — a green
+      build does not prove playback works.
 
 ## Risk
 

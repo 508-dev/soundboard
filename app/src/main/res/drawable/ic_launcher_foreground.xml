@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Waveform bars, echoing the notification glyph. Drawn inside the 72dp
+     adaptive-icon safe zone (18dp inset on a 108dp canvas). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:translateX="27" android:translateY="27">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4,21h6a2,2 0 0,1 2,2v8a2,2 0 0,1 -2,2h-6a2,2 0 0,1 -2,-2v-8a2,2 0 0,1 2,-2z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M17,9h6a2,2 0 0,1 2,2v32a2,2 0 0,1 -2,2h-6a2,2 0 0,1 -2,-2v-32a2,2 0 0,1 2,-2z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M30,0h6a2,2 0 0,1 2,2v50a2,2 0 0,1 -2,2h-6a2,2 0 0,1 -2,-2v-50a2,2 0 0,1 2,-2z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M43,9h6a2,2 0 0,1 2,2v32a2,2 0 0,1 -2,2h-6a2,2 0 0,1 -2,-2v-32a2,2 0 0,1 2,-2z" />
+    </group>
+</vector>

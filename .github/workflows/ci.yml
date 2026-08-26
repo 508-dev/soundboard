@@ -15,51 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      typescript: ${{ steps.filter.outputs.typescript }}
-      python: ${{ steps.filter.outputs.python }}
-      infra: ${{ steps.filter.outputs.infra }}
-      workflow: ${{ steps.filter.outputs.workflow }}
-    steps:
-      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          # paths-filter runs with token: "" below, so it needs enough history
-          # to compare commits locally instead of calling the PR files API.
-          fetch-depth: 0
-          persist-credentials: false
-
-      - id: filter
-        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
-        with:
-          # Keep the workflow at contents:read. Empty token forces git-based
-          # detection and avoids requiring pull-requests:read.
-          token: ""
-          filters: |
-            typescript:
-              - "stacks/typescript/**"
-              - "package.json"
-              - "bun.lock"
-              - "bunfig.toml"
-              - "biome.json"
-              - "scripts/*.sh"
-            python:
-              - "stacks/python/**"
-            infra:
-              - "compose.yml"
-              - "docker-compose.yml"
-              - ".env.example"
-            workflow:
-              - ".github/workflows/**"
-
-  typescript:
-    needs: changes
-    if: needs.changes.outputs.typescript == 'true' || needs.changes.outputs.workflow == 'true'
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
@@ -70,96 +26,34 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
-          bun-version: 1.3.13
+          distribution: temurin
+          java-version: "17"
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
 
-      - name: Biome
-        run: bun run lint
+      # Runner images track recent SDK platforms/build-tools but can lag a
+      # freshly bumped compileSdk by a release or two; let AGP fetch what's
+      # missing rather than pinning CI to whatever happens to be preinstalled.
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
-      - name: Typecheck
-        run: bun run typecheck
+      - name: ktlint
+        run: ./gradlew ktlintCheck
 
-      - name: Tests
-        run: bun run test
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest
 
-      - name: Build
-        run: bun run build
+      - name: Android lint
+        run: ./gradlew lintDebug
 
-  python:
-    needs: changes
-    if: needs.changes.outputs.python == 'true' || needs.changes.outputs.workflow == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+      - name: Assemble debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          egress-policy: audit
-
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
-        with:
-          enable-cache: true
-
-      - name: Install Python
-        run: uv python install 3.12
-
-      - name: Install dependencies
-        working-directory: stacks/python
-        run: uv sync --locked
-
-      - name: Check Python stack
-        run: ./stacks/python/scripts/check-all.sh
-
-  compose:
-    needs: changes
-    if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.workflow == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
-          persist-credentials: false
-
-      - name: Validate Compose config
-        run: docker compose -f compose.yml --env-file .env.example config
-
-  ci-passed:
-    if: always()
-    needs:
-      - changes
-      - typescript
-      - python
-      - compose
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check required jobs
-        run: |
-          changes_result='${{ needs.changes.result }}'
-          typescript_result='${{ needs.typescript.result }}'
-          python_result='${{ needs.python.result }}'
-          compose_result='${{ needs.compose.result }}'
-          if [ "$changes_result" != "success" ]; then
-            echo "The changes job did not pass: changes=${changes_result}" >&2
-            exit 1
-          fi
-          # Component jobs may be skipped by the path filter. That is healthy
-          # only when path detection itself succeeded, which is checked above.
-          for result in "$typescript_result" "$python_result" "$compose_result"; do
-            case "$result" in
-              success|skipped)
-                ;;
-              *)
-                echo "A required CI job did not pass: changes=${changes_result}, typescript=${typescript_result}, python=${python_result}, compose=${compose_result}" >&2
-                exit 1
-                ;;
-            esac
-          done
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14

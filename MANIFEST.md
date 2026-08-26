@@ -1,5 +1,13 @@
 # 508 Devkit Manifest
 
+**This is a record of the 508.dev devkit this repo was generated from, not an
+inventory of this repo.** Soundboard is a native Android app; the devkit's
+Bun/TypeScript, Python, Ruby, and Docker Compose pieces listed below were
+deleted during setup (see `DECISIONS.md` → "Native Android, Not A Web/Service
+Stack"). It is kept for one purpose: if this project ever gains a component the
+devkit covers — a backend, a companion web app — this table is the checklist for
+pulling that convention pack in.
+
 This manifest is the agent-facing inventory for template selection. Use it to
 walk the repo before copying or deleting files.
 
