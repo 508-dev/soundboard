@@ -45,7 +45,9 @@ Four layers, each with one job:
   `AudioFocusHolder` (one focus request for the whole app), `PlaybackService`
   (foreground lifetime + notification), `PlaybackStatus`.
 - `ui/` — `SoundboardViewModel`, `SoundboardScreen`, `components/SoundRow`,
-  `components/VolumeDial`, `theme/`.
+  `components/VolumeDial`, `components/AppScaffold` (drawer),
+  `components/DrawerScaffold` (shared top bar), `navigation/`, `about/`,
+  `theme/`.
 - `SoundboardApp` — the composition root; owns the engine and repository.
 
 ## Audio Rules
@@ -81,6 +83,12 @@ change. Read `DECISIONS.md` before working in `audio/`.
   software (no Google Play Services, no Firebase, no closed-source SDKs).
 - No dependency injection framework is in use by design (see `DECISIONS.md`).
   Don't introduce Hilt/Koin without discussing it first.
+- **Adding or removing a dependency means editing `DEPENDENCIES` in
+  `ui/about/LicensesScreen.kt`.** That list is hand-maintained because the
+  Play-services OSS-licences plugin isn't free software. A stale list is an
+  F-Droid compliance problem, not a cosmetic one.
+- About-page copy lives in `res/values/strings.xml` under `about_*`, not in
+  `AboutScreen.kt`. Several values are still marked `TODO`.
 - Prefer matching the sibling app `emotion-tracker` on shared conventions;
   where this repo diverges, `DECISIONS.md` says why.
 

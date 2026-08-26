@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -23,10 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,12 +41,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.co508.soundboard.R
 import dev.co508.soundboard.audio.PlaybackService
 import dev.co508.soundboard.data.Sound
+import dev.co508.soundboard.ui.components.DrawerScaffold
 import dev.co508.soundboard.ui.components.SoundRow
 import dev.co508.soundboard.ui.components.VolumeDialDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SoundboardScreen(viewModel: SoundboardViewModel = viewModel(factory = SoundboardViewModel.Factory)) {
+fun SoundboardScreen(
+    onOpenDrawer: () -> Unit,
+    viewModel: SoundboardViewModel = viewModel(factory = SoundboardViewModel.Factory),
+) {
     val rows by viewModel.rows.collectAsStateWithLifecycle()
     val anyPlaying by viewModel.anyPlaying.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -59,27 +61,26 @@ fun SoundboardScreen(viewModel: SoundboardViewModel = viewModel(factory = Soundb
     var deleteTarget by remember { mutableStateOf<Sound?>(null) }
 
     // ACTION_OPEN_DOCUMENT, not GET_CONTENT: only the former yields a URI whose
-    // read permission can be persisted across reboots.
-    val pickSound =
-        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let(viewModel::add)
+    // read permission can be persisted across reboots. The "multiple" variant
+    // sets EXTRA_ALLOW_MULTIPLE so a whole folder of ambience can be added at
+    // once; it returns an empty list when the user backs out.
+    val pickSounds =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            viewModel.add(uris)
         }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    if (anyPlaying) {
-                        IconButton(onClick = viewModel::pauseAll) {
-                            Icon(Icons.Filled.Stop, contentDescription = stringResource(R.string.stop_all))
-                        }
-                    }
-                },
-            )
+    DrawerScaffold(
+        titleRes = R.string.nav_soundboard,
+        onOpenDrawer = onOpenDrawer,
+        actions = {
+            if (anyPlaying) {
+                IconButton(onClick = viewModel::pauseAll) {
+                    Icon(Icons.Filled.StopCircle, contentDescription = stringResource(R.string.stop_all))
+                }
+            }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { pickSound.launch(arrayOf(AUDIO_MIME_TYPE)) }) {
+            FloatingActionButton(onClick = { pickSounds.launch(arrayOf(AUDIO_MIME_TYPE)) }) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_sound))
             }
         },

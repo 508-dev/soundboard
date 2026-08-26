@@ -17,7 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import dev.co508.soundboard.ui.SoundboardScreen
+import dev.co508.soundboard.ui.components.AppScaffold
 import dev.co508.soundboard.ui.theme.SoundboardTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
             SoundboardTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     RequestNotificationPermission()
-                    SoundboardScreen()
+                    AppScaffold()
                 }
             }
         }

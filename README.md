@@ -8,13 +8,14 @@ Free software (GPL-3), no account, no network calls, no telemetry.
 
 ## What It Does
 
-- **Add sounds** with the `+` button. The system file picker opens; anything
-  you choose joins the board. The file itself is never copied or moved —
-  Soundboard just remembers where it is.
+- **Add sounds** with the `+` button. The system file picker opens and accepts
+  a multi-selection, so a whole folder of ambience lands in one go. The files
+  themselves are never copied or moved — Soundboard just remembers where they
+  are.
 - **Play any combination at once.** Each row has its own play/pause toggle,
   and sounds loop until you stop them. Tapping anywhere on a row toggles it
   too.
-- **Set each sound's volume** by tapping its percentage, then dragging around
+- **Set each sound's volume** by tapping its volume pill, then dragging around
   the dial. The percentage is *relative*: your device's volume keys still move
   the whole mix together, and each sound keeps its balance within it.
 - **Keeps playing in the background** with the screen off. A notification shows
@@ -80,8 +81,8 @@ Four small layers:
   Audio focus is requested once for the whole app rather than per player.
   `PlaybackService` is a foreground service that exists only to keep the
   process alive and show the notification.
-- **`ui/`** — one screen, a Compose list of cards, plus the custom `Canvas`
-  volume dial.
+- **`ui/`** — a navigation drawer over three destinations (the board, About,
+  Licenses), a Compose list of cards, and the custom `Canvas` volume dial.
 - **`SoundboardApp`** — the composition root. No DI framework.
 
 The reasoning behind each of those, and the options that were rejected, is in

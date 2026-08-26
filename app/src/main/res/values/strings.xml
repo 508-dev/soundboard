@@ -24,6 +24,45 @@
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
 
+    <!-- Navigation -->
+    <string name="nav_menu_content_description">Open navigation menu</string>
+    <string name="nav_soundboard">Soundboard</string>
+    <string name="nav_about">About</string>
+    <string name="nav_licenses">Licenses</string>
+
+    <!-- ===================================================================
+         About page — TEMPLATE. Everything below marked TODO is placeholder
+         copy; edit it here rather than in AboutScreen.kt.
+         =================================================================== -->
+    <string name="about_version">Version %1$s</string>
+
+    <string name="about_app_title">About this app</string>
+    <!-- TODO: describe the app in a couple of sentences. -->
+    <string name="about_app_body">TODO: Soundboard lets you mix looping ambient sounds from your own audio files — play any number at once and set each one\'s volume independently. Everything stays on your device; the app makes no network calls.</string>
+
+    <string name="about_508_title">About 508.dev</string>
+    <!-- TODO: replace with real copy about the co-op — what it is, who it's
+         for, how to get in touch or get involved. -->
+    <string name="about_508_body">TODO: 508.dev is an engineering co-operative. Add a description of the co-op here, what kinds of work it takes on, and how to reach it.</string>
+
+    <string name="about_link_repo">Source code</string>
+    <!-- TODO: point at the real repository. -->
+    <string name="about_link_repo_url">https://github.com/508dev/soundboard</string>
+
+    <string name="about_link_508">508.dev</string>
+    <!-- TODO: confirm the canonical URL. -->
+    <string name="about_link_508_url">https://508.dev</string>
+
+    <string name="about_licenses_summary">Open-source licenses for this app and its dependencies</string>
+    <string name="about_license_line">Soundboard is free software released under the GNU General Public License v3.</string>
+
+    <!-- Licenses page -->
+    <string name="licenses_app_title">Soundboard</string>
+    <string name="licenses_app_body">Released under the GNU General Public License, version 3. You may use, study, share, and modify this app, provided derivative works carry the same license.</string>
+    <string name="licenses_gpl_link">Read the GPL v3</string>
+    <string name="licenses_third_party_title">Third-party components</string>
+    <string name="licenses_apache_note">Components marked Apache License 2.0 are distributed under those terms; a copy is available at https://www.apache.org/licenses/LICENSE-2.0. Every dependency this app ships is free software, which is a requirement for F-Droid distribution.</string>
+
     <!-- Playback notification -->
     <string name="playback_channel_name">Playback</string>
     <string name="playback_channel_description">Shown while sounds are looping, so playback keeps running in the background.</string>

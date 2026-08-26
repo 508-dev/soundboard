@@ -44,8 +44,9 @@ class SoundboardViewModel(
 
     fun pauseAll() = engine.pauseAll()
 
-    fun add(uri: Uri) {
-        viewModelScope.launch { repository.add(uri) }
+    fun add(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        viewModelScope.launch { repository.add(uris) }
     }
 
     /**

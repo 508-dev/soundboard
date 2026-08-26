@@ -34,10 +34,36 @@ class SoundRepository(
      * The caller must have used `ACTION_OPEN_DOCUMENT` (not `ACTION_GET_CONTENT`);
      * only the former grants a permission that survives a reboot.
      */
-    suspend fun add(uri: Uri) {
-        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        val name = displayNameOf(uri) ?: uri.lastPathSegment ?: "Sound"
-        store.updateData { it.withSound(id = UUID.randomUUID().toString(), uri = uri.toString(), name = name) }
+    suspend fun add(uri: Uri) = add(listOf(uri))
+
+    /**
+     * Adds every picked document in a single write.
+     *
+     * Names are resolved before touching the store so one slow content provider
+     * doesn't hold a DataStore transaction open. A file whose permission can't
+     * be persisted is skipped rather than failing the whole batch — with a
+     * multi-select of thirty files, losing one shouldn't lose the other
+     * twenty-nine.
+     */
+    suspend fun add(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+
+        val picked =
+            uris.mapNotNull { uri ->
+                try {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    uri to (displayNameOf(uri) ?: uri.lastPathSegment ?: DEFAULT_NAME)
+                } catch (_: SecurityException) {
+                    null
+                }
+            }
+        if (picked.isEmpty()) return
+
+        store.updateData { library ->
+            picked.fold(library) { acc, (uri, name) ->
+                acc.withSound(id = UUID.randomUUID().toString(), uri = uri.toString(), name = name)
+            }
+        }
     }
 
     /**
@@ -87,6 +113,7 @@ class SoundRepository(
 
     companion object {
         private const val FILE_NAME = "sound_library.json"
+        private const val DEFAULT_NAME = "Sound"
 
         fun create(context: Context): SoundRepository {
             val store =

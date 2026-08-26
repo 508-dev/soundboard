@@ -32,8 +32,9 @@ you find yourself differing for no reason, prefer the sibling's choice.
 
 ## Jetpack Compose Over Views
 
-The whole UI is a single scrolling list of cards, a FAB, and three modals. That
-is squarely Compose's strong case, it is what the sibling app uses, and it keeps
+The UI is a scrolling list of cards, a FAB, three modals, and a drawer over two
+static pages. That is squarely Compose's strong case, it is what the sibling app
+uses, and it keeps
 the custom volume dial (`ui/components/VolumeDial.kt`) as ~100 lines of `Canvas`
 plus two gesture detectors rather than a custom `View` subclass.
 
@@ -130,8 +131,8 @@ The spec asks for this explicitly, and it is also the right default: audio files
 are large, users already have them organised, and silently duplicating them into
 app storage doubles disk use and creates a second copy that drifts.
 
-The picker uses `ACTION_OPEN_DOCUMENT` (via `OpenDocument`), **not**
-`ACTION_GET_CONTENT` — only the former returns a URI whose read permission can
+The picker uses `ACTION_OPEN_DOCUMENT` (via `OpenMultipleDocuments`), **not**
+`ACTION_GET_CONTENT` — only the former returns URIs whose read permission can
 be persisted with `takePersistableUriPermission` and survive a reboot. The
 permission is released when the sound is removed, so the app does not hoard
 grants.
@@ -172,6 +173,60 @@ there, but the whole card is also clickable and does the same thing: it is a far
 easier target on a phone, and it makes the card's ripple mean something. The
 volume percentage and long-press gesture keep their own handling, so the row tap
 is unambiguous.
+
+## Navigation Drawer Over Three Flat Destinations
+
+The board, About, and Licenses are siblings with no hierarchy, so a
+`ModalNavigationDrawer` behind a hamburger is the right container — it scales to
+a Settings or Presets entry later without restructuring anything.
+
+Classic `navigation-compose` rather than local state, matching the sibling app.
+It costs one dependency, and buys correct system-back behaviour and
+`saveState`/`restoreState` on the board's scroll position for free; hand-rolled
+screen switching gets both of those wrong by default.
+
+Unlike the sibling, the top bar is **not** hoisted into `AppScaffold`. The board
+needs a FAB and a "stop all" action that the other two screens have no use for,
+and hoisting would mean threading `SoundboardViewModel` up past screens that
+don't want it. Each screen renders its own `DrawerScaffold` instead, which is
+the shared top bar plus a hamburger, with slots for whatever chrome that screen
+adds.
+
+## The Licence List Is Hand-Maintained
+
+`ui/about/LicensesScreen.kt` holds a literal `DEPENDENCIES` list. The obvious
+alternative — Google's OSS-licences Gradle plugin — generates the list
+automatically but is part of Play Services, which is not free software and would
+undermine the F-Droid goal outright.
+
+So the list is written by hand and grouped by project rather than by Maven
+coordinate, since listing every `androidx.*` artifact separately is noise when
+they share a licence. **It must be updated whenever
+`gradle/libs.versions.toml` changes.** A stale list here is a compliance
+problem, not a cosmetic one.
+
+## Multi-Select When Adding Sounds
+
+The picker uses `OpenMultipleDocuments` rather than `OpenDocument`. Adding
+ambience happens in batches — a folder of field recordings, not one file — and
+the single-select flow meant re-opening the picker once per file.
+
+The batch is added in a single DataStore write, with display names resolved
+before the transaction opens so one slow content provider can't hold it. A file
+whose permission can't be persisted is skipped rather than failing the batch:
+losing one file out of thirty shouldn't lose the other twenty-nine.
+
+Note Android caps how many persisted URI grants an app may hold (512 on current
+versions, 128 historically). Well beyond a plausible board, but it is the reason
+grants are released on delete rather than left to accumulate.
+
+## The Volume Percentage Is A Button, Not A Label
+
+First pass rendered the percentage as a bare `TextButton`, and it read as a
+status readout — nothing said "tap me". It is now a filled pill with a speaker
+icon, in the same colour as the play button beside it, so the two read as one
+cluster of controls sitting on the card. The icon switches to a muted speaker at
+0% so a silenced sound is obvious without reading the number.
 
 ## No Dependency Injection Framework
 

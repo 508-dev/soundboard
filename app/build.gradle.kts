@@ -69,6 +69,8 @@ android {
 
     buildFeatures {
         compose = true
+        // BuildConfig.VERSION_NAME is shown on the About screen.
+        buildConfig = true
     }
 
     packaging {
@@ -89,6 +91,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.common)

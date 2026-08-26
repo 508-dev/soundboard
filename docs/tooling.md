@@ -16,6 +16,7 @@ overlap:
 | Gradle (wrapper) | 9.4.1 | `gradle/wrapper/gradle-wrapper.properties`, sha256-verified. |
 | Kotlin | 2.3.20 | |
 | Compose BOM | 2026.08.00 | Pins all `androidx.compose.*` artifact versions together. |
+| Navigation Compose | 2.9.8 | Classic (not Nav3) — three flat drawer destinations. |
 | Media3 (ExoPlayer) | 1.11.0 | One player per sound; see `DECISIONS.md`. |
 | DataStore | 1.2.1 | Stores the board as a single JSON document. |
 | Lifecycle | 2.11.0 | Includes `lifecycle-runtime-compose` for `collectAsStateWithLifecycle`. |
