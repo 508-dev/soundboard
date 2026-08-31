@@ -86,6 +86,11 @@ fun AboutScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            AboutSection(
+                titleRes = R.string.about_monetization_title,
+                bodyRes = R.string.about_monetization_body,
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             ListItem(
                 headlineContent = { Text(stringResource(R.string.nav_licenses)) },
