@@ -29,8 +29,8 @@ import dev.co508.soundboard.ui.components.rememberUrlOpener
 /**
  * Template About page.
  *
- * The prose lives in `res/values/strings.xml` under the `about_*` keys, 
- * `so filling this in is a strings edit rather than a Compose edit. The
+ * The prose lives in `res/values/strings.xml` under the `about_*` keys,
+ * so filling this in is a strings edit rather than a Compose edit. The
  * link URLs are in the same place under `about_link_*_url`.
  */
 @Composable

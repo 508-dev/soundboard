@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +44,7 @@ import dev.co508.soundboard.R
 import dev.co508.soundboard.audio.PlaybackService
 import dev.co508.soundboard.data.Sound
 import dev.co508.soundboard.ui.components.DrawerScaffold
+import dev.co508.soundboard.ui.components.ReorderableSoundList
 import dev.co508.soundboard.ui.components.SoundRow
 import dev.co508.soundboard.ui.components.VolumeDialDialog
 
@@ -60,6 +63,11 @@ fun SoundboardScreen(
     var optionsTarget by remember { mutableStateOf<Sound?>(null) }
     var deleteTarget by remember { mutableStateOf<Sound?>(null) }
 
+    // Rearrange mode swaps the whole list for a drag-reorderable one; see
+    // `ReorderableSoundList` for why it's a separate row rather than teaching
+    // long-press to mean two different things.
+    var rearranging by remember { mutableStateOf(false) }
+
     // ACTION_OPEN_DOCUMENT, not GET_CONTENT: only the former yields a URI whose
     // read permission can be persisted across reboots. The "multiple" variant
     // sets EXTRA_ALLOW_MULTIPLE so a whole folder of ambience can be added at
@@ -70,9 +78,18 @@ fun SoundboardScreen(
         }
 
     DrawerScaffold(
-        titleRes = R.string.nav_soundboard,
+        titleRes = if (rearranging) R.string.rearrange_title else R.string.app_name,
         onOpenDrawer = onOpenDrawer,
         actions = {
+            if (rows.isNotEmpty()) {
+                IconButton(onClick = { rearranging = !rearranging }) {
+                    Icon(
+                        imageVector = if (rearranging) Icons.Filled.Done else Icons.AutoMirrored.Filled.Sort,
+                        contentDescription =
+                            stringResource(if (rearranging) R.string.rearrange_done else R.string.rearrange_start),
+                    )
+                }
+            }
             if (anyPlaying) {
                 IconButton(onClick = viewModel::pauseAll) {
                     Icon(Icons.Filled.StopCircle, contentDescription = stringResource(R.string.stop_all))
@@ -80,13 +97,22 @@ fun SoundboardScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { pickSounds.launch(arrayOf(AUDIO_MIME_TYPE)) }) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_sound))
+            if (!rearranging) {
+                FloatingActionButton(onClick = { pickSounds.launch(arrayOf(AUDIO_MIME_TYPE)) }) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_sound))
+                }
             }
         },
     ) { padding ->
         if (rows.isEmpty()) {
             EmptyState(modifier = Modifier.fillMaxSize().padding(padding))
+        } else if (rearranging) {
+            ReorderableSoundList(
+                rows = rows,
+                onReordered = viewModel::commitOrder,
+                onDelete = { deleteTarget = it },
+                modifier = Modifier.fillMaxSize().padding(padding),
+            )
         } else {
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),

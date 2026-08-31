@@ -87,6 +87,11 @@ class SoundRepository(
         store.updateData { it.withVolume(id, percent) }
     }
 
+    /** Persists a new sound order — see [SoundLibrary.reordered]. */
+    suspend fun reorder(order: List<String>) {
+        store.updateData { it.reordered(order) }
+    }
+
     private fun releaseUriPermission(uri: Uri) {
         try {
             contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)

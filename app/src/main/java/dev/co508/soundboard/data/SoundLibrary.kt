@@ -56,4 +56,38 @@ data class SoundLibrary(
         )
 
     fun find(id: String): Sound? = sounds.firstOrNull { it.id == id }
+
+    /**
+     * Moves the sound at [fromIndex] to [toIndex], shifting the sounds between them.
+     *
+     * Out-of-range indices are a no-op rather than a crash, since the caller derives
+     * indices from a live drag gesture that can race a list change (e.g. a sound
+     * removed elsewhere mid-drag).
+     */
+    fun moved(
+        fromIndex: Int,
+        toIndex: Int,
+    ): SoundLibrary {
+        if (fromIndex == toIndex || fromIndex !in sounds.indices || toIndex !in sounds.indices) return this
+        val reordered = sounds.toMutableList()
+        reordered.add(toIndex, reordered.removeAt(fromIndex))
+        return copy(sounds = reordered)
+    }
+
+    /**
+     * Reorders sounds to match [order], a list of every sound id in the desired order.
+     *
+     * Used both to commit a drag's final position and to apply the one-shot sort
+     * shortcuts (name, volume, currently-playing) computed by the caller. An id in
+     * [order] that isn't on the board is ignored; a sound missing from [order] keeps
+     * its relative position, appended at the end — this degrades safely if the board
+     * changed underneath a stale order (e.g. an add finished mid-drag) rather than
+     * dropping rows.
+     */
+    fun reordered(order: List<String>): SoundLibrary {
+        val byId = sounds.associateBy { it.id }
+        val known = order.mapNotNull { byId[it] }
+        val remaining = sounds.filterNot { it.id in order }
+        return copy(sounds = known + remaining)
+    }
 }

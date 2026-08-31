@@ -74,6 +74,18 @@ class SoundboardViewModel(
         viewModelScope.launch { repository.remove(id) }
     }
 
+    /**
+     * Persists a new sound order.
+     *
+     * Called once a drag ends (with the whole board's ids in their new order) and
+     * by rearrange mode's sort shortcuts — both are one-shot writes, not a
+     * continuously maintained sort, so a later manual drag is free to move things
+     * again.
+     */
+    fun commitOrder(order: List<String>) {
+        viewModelScope.launch { repository.reorder(order) }
+    }
+
     companion object {
         private const val STOP_TIMEOUT_MS = 5_000L
 

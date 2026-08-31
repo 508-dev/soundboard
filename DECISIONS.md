@@ -251,6 +251,55 @@ and `AudioFocusRequest` natively, so there are no compat branches in the audio o
 notification code. targetSdk stays one below compileSdk until API 37's behaviour
 changes are reviewed.
 
+## Reordering Is A Separate Mode, Not A Long-Press Overload
+
+The board already used long-press on a row to open the delete sheet. Adding
+drag-to-reorder on the same row means either teaching long-press to mean two
+different things (menu vs. drag start), or moving delete somewhere else so
+long-press is unambiguous. Both are workable; the app instead adds an explicit
+"rearrange" toggle in the top bar that swaps the whole list for
+`ReorderableSoundList` — a different row entirely, with a dedicated drag handle
+and a trailing delete icon, tap-to-play disabled. Normal mode is completely
+unchanged.
+
+The toggle also gives rearrange mode a natural home for the one-shot sort
+shortcuts (name, volume, currently-playing) — thinking of the toggled state as
+"the board as a table" rather than "drag mode" is what made this the right
+split, not just a gesture-conflict workaround.
+
+Sort shortcuts and a completed drag both go through
+`SoundLibrary.reordered(order)` — a single "apply this id order" primitive — so
+a sort is a one-time write, not a continuously maintained mode; the user can
+drag again immediately after tapping a sort chip. "Currently playing" is the
+one sort that can't be a pure `SoundLibrary` function, since playback status is
+live engine state the library doesn't have — so all three sorts are computed in
+`ReorderableSoundList` from `SoundRowState`, which already carries it. (They
+started out in `SoundboardViewModel`, but that routes the order change through
+a DataStore round-trip, which breaks the same-frame requirement below.)
+
+Two scroll behaviours of `LazyColumn` shape the implementation. Foundation pins
+scroll position to the first visible item's *key* when the item list changes
+(`LazyListScrollPosition.updateScrollPositionIfTheFirstItemWasMoved`) — usually
+what you want, but here it means (1) a drag swap involving the topmost visible
+row scrolls the whole viewport along with it, and (2) a re-sorted board "jumps
+to a random place" as the anchor follows whatever row happened to be on top.
+An explicit `scrollToItem` clears the stored anchor key
+(`requestPositionAndForgetLastKnownKey`), so both fixes request the desired
+position in the same frame as the order change: re-pin the current position on
+every swap (position-wise a no-op; it only disarms the anchor), and request the
+top on a sort. Sorts are applied to the list's working order synchronously and
+only then persisted via `commitOrder`, because the scroll request has to land
+in the same frame as the order change to beat the anchor restore — any
+round-trip in between lets a measure re-populate the anchor key first.
+
+Drag mechanics are hand-rolled (`detectDragGestures` + `LazyListState.layoutInfo`
+to find item bounds and swap), matching how `VolumeDial` already does custom
+gesture handling in this codebase, rather than adding a third-party
+reorderable-list dependency — Compose Foundation 1.12 (the version this app is
+on) has no built-in list-reorder API. Revisit if a future Foundation release
+ships one; hand-rolled swap-threshold math is the kind of code that's fine to
+delete in favor of a first-party API.
+
 ## Deferred: Instrumented (`androidTest`) Coverage
 
 Unit tests cover the pure logic: library mutations, persistence round-trips and

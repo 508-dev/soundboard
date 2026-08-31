@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Soundboard</string>
+    <string name="app_name">508.dev Soundboard</string>
 
     <!-- Main screen -->
     <string name="add_sound">Add sound</string>
@@ -16,6 +16,16 @@
     <string name="volume_for">Volume for %1$s</string>
     <string name="volume_dial_hint">Drag around the dial to set volume</string>
     <string name="done">Done</string>
+
+    <!-- Rearrange mode -->
+    <string name="rearrange_start">Rearrange sounds</string>
+    <string name="rearrange_done">Done rearranging</string>
+    <string name="rearrange_title">Rearrange list</string>
+    <string name="reorder_handle">Drag to reorder %1$s</string>
+    <string name="sort_label">Sort:</string>
+    <string name="sort_by_name">Name</string>
+    <string name="sort_by_volume">Volume</string>
+    <string name="sort_by_playing">Playing</string>
 
     <!-- Long-press options -->
     <string name="delete">Delete</string>
