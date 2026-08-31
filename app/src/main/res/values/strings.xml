@@ -38,16 +38,16 @@
 
     <string name="about_app_title">About this app</string>
     <!-- TODO: describe the app in a couple of sentences. -->
-    <string name="about_app_body">TODO: Soundboard lets you mix looping ambient sounds from your own audio files — play any number at once and set each one\'s volume independently. Everything stays on your device; the app makes no network calls.</string>
+    <string name="about_app_body">508 Soundboard is a simple, offline app that allows you to play any number of sound files at once, choosing the volume for each independently. The most common use case is for creating ambient spaces in tabletop gaming, or for creating soundscapes to help in sleep.</string>
 
     <string name="about_508_title">About 508.dev</string>
     <!-- TODO: replace with real copy about the co-op — what it is, who it's
          for, how to get in touch or get involved. -->
-    <string name="about_508_body">TODO: 508.dev is an engineering co-operative. Add a description of the co-op here, what kinds of work it takes on, and how to reach it.</string>
+    <string name="about_508_body">508.dev is a software engineering co-op with members in the USA, Taiwan, Japan, and Ethiopia. A co-op is a company that's owned by its workers, rather than shareholders or founders. 508.dev is available for consulting on interesting, ethical projects. If you're interested in discussing, or in joining, please visit our website, linked below.</string>
 
     <string name="about_link_repo">Source code</string>
     <!-- TODO: point at the real repository. -->
-    <string name="about_link_repo_url">https://github.com/508dev/soundboard</string>
+    <string name="about_link_repo_url">https://github.com/508-dev/emotion-tracker</string>
 
     <string name="about_link_508">508.dev</string>
     <!-- TODO: confirm the canonical URL. -->
