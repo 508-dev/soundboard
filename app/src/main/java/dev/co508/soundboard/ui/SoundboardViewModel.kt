@@ -74,6 +74,13 @@ class SoundboardViewModel(
         viewModelScope.launch { repository.remove(id) }
     }
 
+    fun rename(
+        id: String,
+        name: String,
+    ) {
+        viewModelScope.launch { repository.rename(id, name) }
+    }
+
     /**
      * Persists a new sound order.
      *

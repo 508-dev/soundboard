@@ -87,6 +87,14 @@ class SoundRepository(
         store.updateData { it.withVolume(id, percent) }
     }
 
+    /** Renames a sound — see [SoundLibrary.renamed]. */
+    suspend fun rename(
+        id: String,
+        name: String,
+    ) {
+        store.updateData { it.renamed(id, name) }
+    }
+
     /** Persists a new sound order — see [SoundLibrary.reordered]. */
     suspend fun reorder(order: List<String>) {
         store.updateData { it.reordered(order) }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 fun ReorderableSoundList(
     rows: List<SoundRowState>,
     onReordered: (List<String>) -> Unit,
+    onEdit: (Sound) -> Unit,
     onDelete: (Sound) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -144,6 +146,7 @@ fun ReorderableSoundList(
 
                 ReorderableSoundRow(
                     row = row,
+                    onEdit = { onEdit(row.sound) },
                     onDelete = { onDelete(row.sound) },
                     onDragStart = {
                         draggingId = row.sound.id
@@ -233,6 +236,7 @@ private fun SortChipsRow(
 @Composable
 private fun ReorderableSoundRow(
     row: SoundRowState,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
@@ -277,6 +281,12 @@ private fun ReorderableSoundRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+            IconButton(onClick = onEdit) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.rename_content_description, row.sound.name),
+                )
+            }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
             }

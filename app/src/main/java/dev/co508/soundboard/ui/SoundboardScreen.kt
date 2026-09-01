@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +45,7 @@ import dev.co508.soundboard.R
 import dev.co508.soundboard.audio.PlaybackService
 import dev.co508.soundboard.data.Sound
 import dev.co508.soundboard.ui.components.DrawerScaffold
+import dev.co508.soundboard.ui.components.RenameDialog
 import dev.co508.soundboard.ui.components.ReorderableSoundList
 import dev.co508.soundboard.ui.components.SoundRow
 import dev.co508.soundboard.ui.components.VolumeDialDialog
@@ -62,6 +64,7 @@ fun SoundboardScreen(
     var volumeTarget by remember { mutableStateOf<Sound?>(null) }
     var optionsTarget by remember { mutableStateOf<Sound?>(null) }
     var deleteTarget by remember { mutableStateOf<Sound?>(null) }
+    var renameTarget by remember { mutableStateOf<Sound?>(null) }
 
     // Rearrange mode swaps the whole list for a drag-reorderable one; see
     // `ReorderableSoundList` for why it's a separate row rather than teaching
@@ -110,6 +113,7 @@ fun SoundboardScreen(
             ReorderableSoundList(
                 rows = rows,
                 onReordered = viewModel::commitOrder,
+                onEdit = { renameTarget = it },
                 onDelete = { deleteTarget = it },
                 modifier = Modifier.fillMaxSize().padding(padding),
             )
@@ -150,6 +154,17 @@ fun SoundboardScreen(
         ModalBottomSheet(onDismissRequest = { optionsTarget = null }) {
             ListItem(headlineContent = { Text(sound.name) })
             ListItem(
+                headlineContent = { Text(stringResource(R.string.edit)) },
+                leadingContent = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            optionsTarget = null
+                            renameTarget = sound
+                        },
+            )
+            ListItem(
                 headlineContent = { Text(stringResource(R.string.delete)) },
                 leadingContent = { Icon(Icons.Filled.Delete, contentDescription = null) },
                 modifier =
@@ -161,6 +176,14 @@ fun SoundboardScreen(
                         },
             )
         }
+    }
+
+    renameTarget?.let { sound ->
+        RenameDialog(
+            sound = sound,
+            onRename = { viewModel.rename(sound.id, it) },
+            onDismiss = { renameTarget = null },
+        )
     }
 
     deleteTarget?.let { sound ->

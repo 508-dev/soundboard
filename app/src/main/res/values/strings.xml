@@ -27,6 +27,13 @@
     <string name="sort_by_volume">Volume</string>
     <string name="sort_by_playing">Playing</string>
 
+    <!-- Rename -->
+    <string name="edit">Edit</string>
+    <string name="rename_title">Rename sound</string>
+    <string name="rename_label">Name</string>
+    <string name="rename_save">Save</string>
+    <string name="rename_content_description">Rename %1$s</string>
+
     <!-- Long-press options -->
     <string name="delete">Delete</string>
     <string name="delete_title">Remove “%1$s”?</string>

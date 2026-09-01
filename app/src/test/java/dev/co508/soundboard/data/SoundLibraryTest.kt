@@ -73,6 +73,32 @@ class SoundLibraryTest {
     }
 
     @Test
+    fun `renamed sets one sound and leaves the others alone`() {
+        val library =
+            SoundLibrary()
+                .withSound("a", "content://rain", "Rain")
+                .withSound("b", "content://fan", "Fan")
+                .renamed("a", "Thunderstorm")
+
+        assertEquals("Thunderstorm", library.find("a")?.name)
+        assertEquals("Fan", library.find("b")?.name)
+    }
+
+    @Test
+    fun `renamed trims surrounding whitespace`() {
+        val library = SoundLibrary().withSound("a", "content://rain", "Rain")
+
+        assertEquals("Thunderstorm", library.renamed("a", "  Thunderstorm  ").find("a")?.name)
+    }
+
+    @Test
+    fun `renamed to a blank name is a no-op`() {
+        val library = SoundLibrary().withSound("a", "content://rain", "Rain")
+
+        assertEquals(library, library.renamed("a", "   "))
+    }
+
+    @Test
     fun `moved shifts a sound to a later index`() {
         val library =
             SoundLibrary()

@@ -47,7 +47,7 @@ Four layers, each with one job:
 - `ui/` — `SoundboardViewModel`, `SoundboardScreen`, `components/SoundRow`,
   `components/ReorderableSoundList` (rearrange mode's drag-to-reorder list —
   a separate row from `SoundRow`, not a shared one; see `DECISIONS.md`),
-  `components/VolumeDial`, `components/AppScaffold` (drawer),
+  `components/VolumeDial`, `components/RenameDialog`, `components/AppScaffold` (drawer),
   `components/DrawerScaffold` (shared top bar), `navigation/`, `about/`,
   `theme/`.
 - `SoundboardApp` — the composition root; owns the engine and repository.

@@ -58,6 +58,22 @@ data class SoundLibrary(
     fun find(id: String): Sound? = sounds.firstOrNull { it.id == id }
 
     /**
+     * Renames a sound, trimming surrounding whitespace.
+     *
+     * A blank result is a no-op rather than leaving the row with an empty label —
+     * same "degrade rather than corrupt the board" stance as [withVolume]'s
+     * clamping.
+     */
+    fun renamed(
+        id: String,
+        name: String,
+    ): SoundLibrary {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return this
+        return copy(sounds = sounds.map { if (it.id == id) it.copy(name = trimmed) else it })
+    }
+
+    /**
      * Moves the sound at [fromIndex] to [toIndex], shifting the sounds between them.
      *
      * Out-of-range indices are a no-op rather than a crash, since the caller derives
