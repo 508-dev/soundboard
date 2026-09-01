@@ -60,7 +60,7 @@
     <string name="about_508_body">508.dev is a software engineering co-op with members in the USA, Taiwan, Japan, and Ethiopia. A co-op is a company that\'s owned by its workers, rather than shareholders or founders. 508.dev is available for consulting on interesting, ethical projects. If you\'re interested in discussing, or in joining, please visit our website, linked below.</string>
 
     <string name="about_link_repo">Source code</string>
-    <string name="about_link_repo_url">https://github.com/508-dev/emotion-tracker</string>
+    <string name="about_link_repo_url">https://github.com/508-dev/soundboard</string>
 
     <string name="about_monetization_title">Monetization</string>
     <string name="about_monetization_body">508.dev will never commoditize your humanity by selling your data, or using your data to advertise to you. Should this app monetize, it will likely do so by making a deal with some relevant product or service to display a simple, non-tracking ad within the app. For example, we may approach a sleep headphone vendor, show them our app download count, and negotiate for a monthly fee in return for showing a semi-prominent link to their product on the app. Or, we may gate features behind payment (unlikely). Or, we may offer online features in return for a fee, such as downloading premium sounds. If you prefer not to have any of these sorts of things in the app, we invite you to use the Github link above to modify the code and then compile your own APK that you sideload onto your phone.</string>
