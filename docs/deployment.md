@@ -157,17 +157,20 @@ to it from GitHub Actions, ever. The interaction is a single merge request:
 
 1. Fork <https://gitlab.com/fdroid/fdroiddata>.
 2. Copy `fdroid/fdroiddata/dev.co508.soundboard.yml` to
-   `metadata/dev.co508.soundboard.yml` in the fork.
-3. `fdroid readmeta && fdroid lint -f dev.co508.soundboard`.
+   `metadata/dev.co508.soundboard.yml` in the fork. Don't add a header comment
+   to it — see `fdroid/fdroiddata/README.md` for why.
+3. Run `fdroid rewritemeta` against the fork and confirm it produces no diff
+   before opening the MR — their CI fails the job otherwise. The command is in
+   `fdroid/fdroiddata/README.md`.
 4. Open the merge request, following the current
    [Quick Start guide](https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/)
    — check their docs rather than trusting this file to stay current.
 
 Once merged, `UpdateCheckMode: Tags` makes their bot watch this repo for new
-`v*` tags and `AutoUpdateMode: Version v%v` makes it read the version literals
-out of `app/build.gradle.kts` at that tag and add a build entry itself. From
-then on, tagging a release is the whole interaction. Expect days of lag: their
-build cycle is not ours.
+`v*` tags and `AutoUpdateMode: Version` makes it read the version literals out
+of `app/build.gradle.kts` at that tag and add a build entry itself. From then
+on, tagging a release is the whole interaction. Expect days of lag: their build
+cycle is not ours.
 
 **Two things to verify before submitting**, because both would fail on their
 builder rather than ours:

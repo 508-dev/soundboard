@@ -349,6 +349,18 @@ The self-hosted repo is a git branch rather than a deployed directory because an
 F-Droid repository is cumulative — every published version stays in the index —
 so each run must add to the previous state rather than replace it.
 
+## The f-droid.org Submission File Carries No Comments
+
+`fdroid/fdroiddata/dev.co508.soundboard.yml` has no header explaining itself,
+unlike every other metadata file in this repo. That's deliberate, discovered
+the hard way: fdroiddata's CI runs `fdroid rewritemeta` on any changed metadata
+file and fails the job on any diff it produces, and `rewritemeta`
+unconditionally strips every leading comment. A header there survives exactly
+one lint pass before their own tooling deletes it and breaks CI on the next
+unrelated change. The explanation lives in `fdroid/fdroiddata/README.md`
+instead, a file `rewritemeta` never touches, along with the command to verify a
+change is already in canonical form before opening the MR.
+
 ## Store Copy Lives In `fastlane/`, Not In Each Store's Own Format
 
 Play, the self-hosted F-Droid repo, and f-droid.org all need the same listing

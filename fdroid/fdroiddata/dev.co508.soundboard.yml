@@ -1,27 +1,3 @@
-# Submission metadata for the OFFICIAL f-droid.org repository.
-#
-# This file is not read by any automation in this repo. It is the payload for a
-# one-time merge request to https://gitlab.com/fdroid/fdroiddata, copied to
-# `metadata/dev.co508.soundboard.yml` there. Once it is merged, F-Droid's own
-# bot takes over: `UpdateCheckMode: Tags` makes it watch this repo for new `v*`
-# tags, and `AutoUpdateMode: Version` makes it read versionName/versionCode out
-# of app/build.gradle.kts at that tag and append a new `Builds:` entry itself.
-# That is the reason those two values must stay plain literals — see the
-# comment on them in app/build.gradle.kts.
-#
-# `AutoUpdateMode: Version` takes no tag pattern. The older `Version v%v` form
-# supplied one, but fdroidserver ignores it whenever UpdateCheckMode is `Tags`:
-# it already knows the tag and assigns `commit: <tag>` directly. Newer
-# fdroiddata schemas reject the `v%v` form outright.
-#
-# Nothing here can be pushed from GitHub Actions; f-droid.org builds and signs
-# on its own infrastructure with its own key. docs/deployment.md walks through
-# the submission and what it implies for users.
-#
-# No Summary or Description below on purpose: F-Droid reads
-# fastlane/metadata/android/ from this repo, and duplicating the copy here just
-# creates two things to keep in step.
-
 Categories:
   - Multimedia
 License: GPL-3.0-only
