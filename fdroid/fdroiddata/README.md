@@ -29,12 +29,19 @@ instead.
 - **No `Summary`/`Description` fields.** F-Droid reads
   `fastlane/metadata/android/` from this repo instead, so the store copy has
   one source rather than three.
+- **`AutoName: 508.dev Soundboard` is required, not optional**, and must match
+  the `app_name` string resource exactly. Any app with `RepoType` set and
+  `UpdateCheckMode` other than `None`/`Static` — which is every app here — gets
+  its display name auto-derived by `checkupdates` from the built manifest on
+  every CI run, and their `checkupdates` job fails if that produces any diff
+  against what's committed. Leaving `AutoName` out doesn't skip the check, it
+  just guarantees the first run adds it and fails the diff.
 
 ## Before submitting
 
 Run against a real fdroiddata checkout, not just schema validation — CI runs
-`fdroid rewritemeta` and fails on any diff it produces, which schema
-validation alone won't catch:
+both `fdroid rewritemeta` and `fdroid checkupdates` and fails on any diff
+either produces, neither of which schema validation alone catches:
 
 ```bash
 python3 -m venv /tmp/fdroid-venv && /tmp/fdroid-venv/bin/pip install fdroidserver
@@ -42,8 +49,18 @@ mkdir -p /tmp/fdroiddata-check/metadata
 cp fdroid/fdroiddata/dev.co508.soundboard.yml /tmp/fdroiddata-check/metadata/
 printf 'repo_url: https://example.org/fdroid/repo\nrepo_name: check\n' > /tmp/fdroiddata-check/config.yml
 chmod 600 /tmp/fdroiddata-check/config.yml
-cd /tmp/fdroiddata-check && /tmp/fdroid-venv/bin/fdroid rewritemeta dev.co508.soundboard
-diff -u /path/to/soundboard/fdroid/fdroiddata/dev.co508.soundboard.yml metadata/dev.co508.soundboard.yml
+cd /tmp/fdroiddata-check
+git init --quiet && git add -A && git -c user.email=t@t -c user.name=t commit --quiet -m init
+
+/tmp/fdroid-venv/bin/fdroid rewritemeta dev.co508.soundboard
+git --no-pager diff --exit-code || echo "rewritemeta changed the file — fix before submitting"
+
+mkdir -p build   # checkupdates clones the real repo under here
+/tmp/fdroid-venv/bin/fdroid checkupdates dev.co508.soundboard
+git --no-pager diff --exit-code || echo "checkupdates changed the file — fix before submitting"
 ```
 
-A clean diff means the file is already in canonical form.
+`checkupdates` needs a real, already-pushed tag to check out (it clones the
+repo from the `Repo:` URL in the metadata), so run it after tagging a release,
+not before. Two clean `git diff --exit-code`s means the file is already in
+canonical form for both of fdroiddata's checks.

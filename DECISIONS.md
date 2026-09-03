@@ -358,8 +358,16 @@ file and fails the job on any diff it produces, and `rewritemeta`
 unconditionally strips every leading comment. A header there survives exactly
 one lint pass before their own tooling deletes it and breaks CI on the next
 unrelated change. The explanation lives in `fdroid/fdroiddata/README.md`
-instead, a file `rewritemeta` never touches, along with the command to verify a
-change is already in canonical form before opening the MR.
+instead, a file `rewritemeta` never touches, along with the commands to verify
+a change is already in canonical form before opening the MR.
+
+The same file also carries `AutoName: 508.dev Soundboard`, matching the
+`app_name` string resource exactly, for the same reason: any app with
+`RepoType` set and `UpdateCheckMode` other than `None`/`Static` gets its
+display name auto-derived from the built manifest by fdroiddata's
+`checkupdates` job on every CI run, which fails on any diff that produces.
+Leaving the field out doesn't skip the check — it guarantees the first run
+adds it and fails.
 
 ## Store Copy Lives In `fastlane/`, Not In Each Store's Own Format
 
