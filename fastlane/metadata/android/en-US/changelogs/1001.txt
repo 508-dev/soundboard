@@ -1,0 +1,4 @@
+Bug Fixes:
+
+- commit the changelog file
+- update correct release stuff
