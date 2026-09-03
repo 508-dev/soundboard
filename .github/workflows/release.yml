@@ -32,6 +32,10 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    # RELEASE_PLEASE_TOKEN lives in the Prod environment, not as a repo-level
+    # secret — GitHub only injects environment secrets into a job that
+    # declares that environment.
+    environment: Prod
     permissions:
       contents: write
       pull-requests: write
@@ -83,6 +87,11 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.released == 'true'
     runs-on: ubuntu-latest
+    # The RELEASE_KEYSTORE_*/PLAY_SERVICE_ACCOUNT_JSON secrets live in the Prod
+    # environment, not as repo-level secrets — without this, every secrets.*
+    # reference below resolves empty and "Work out what is configured" quietly
+    # skips all publishing rather than erroring.
+    environment: Prod
     permissions:
       # Attach assets to the release, and push the F-Droid repo to gh-pages.
       contents: write

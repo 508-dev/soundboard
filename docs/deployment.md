@@ -243,8 +243,7 @@ base64 -w0 release.keystore   # the value for RELEASE_KEYSTORE_BASE64
 ```
 
 Back up `release.keystore` and its passwords somewhere durable and offline —
-a password manager, not this repo. Then add, under **Settings → Secrets and
-variables → Actions**:
+a password manager, not this repo. Then add these as secrets:
 
 | Secret | Value |
 | --- | --- |
@@ -252,6 +251,17 @@ variables → Actions**:
 | `RELEASE_KEYSTORE_PASSWORD` | the password you set |
 | `RELEASE_KEY_ALIAS` | `soundboard` |
 | `RELEASE_KEY_PASSWORD` | **the same password again** |
+
+**Where you add them matters.** GitHub has two places: **Settings → Secrets
+and variables → Actions** (repo-level, visible to every job) or **Settings →
+Environments → `<name>` → Environment secrets** (visible only to a job that
+declares `environment: <name>`). This repo's `release.yml` uses the second
+kind — every job that needs a secret declares `environment: Prod` — so add
+these under **Settings → Environments → Prod**, not the repo-level Secrets
+page. A secret added to the wrong one of those two places doesn't error: the
+job just runs with `secrets.WHATEVER` silently empty, which is what "Work out
+what is configured" is there to catch (it prints a `::warning::` and skips
+publishing rather than failing loudly).
 
 The last two passwords are the same value. Keystores default to PKCS12 format,
 which has no per-entry passwords — `keytool` warns "Different store and key
@@ -265,8 +275,10 @@ Gradle still requires both to be supplied.
 A pull request opened with the default `GITHUB_TOKEN` does not trigger CI, so
 the release PR would arrive with no checks on it. Create a fine-grained personal
 access token scoped to this repository with **Contents: read and write** and
-**Pull requests: read and write**, and add it as `RELEASE_PLEASE_TOKEN`. The
-workflow falls back to `GITHUB_TOKEN` without it.
+**Pull requests: read and write**, and add it as `RELEASE_PLEASE_TOKEN` under
+**Settings → Environments → Prod** (see the note above — the `release-please`
+job also declares that environment). The workflow falls back to
+`GITHUB_TOKEN` without it.
 
 ## 4. Google Play
 
@@ -284,7 +296,8 @@ workflow falls back to `GITHUB_TOKEN` without it.
 5. Create a Google Cloud service account, give it a JSON key, and grant it
    access in **Play Console → Users and permissions** with *Release apps to
    testing tracks*.
-6. Add the whole JSON file contents as the `PLAY_SERVICE_ACCOUNT_JSON` secret.
+6. Add the whole JSON file contents as the `PLAY_SERVICE_ACCOUNT_JSON` secret,
+   under **Settings → Environments → Prod** (see the note in step 2 above).
 
 ## 5. Baseline the version
 
