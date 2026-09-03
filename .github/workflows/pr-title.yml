@@ -1,0 +1,53 @@
+# release-please decides the next version, and writes the changelog, from
+# Conventional Commit subjects on main. With squash merging the PR title
+# *becomes* that subject, so an unparseable title silently costs a release
+# entry — this check catches it while the PR is still open.
+#
+# No third-party action: this is one regex, and a release-gating check is a bad
+# place to add a supply-chain dependency.
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the PR title is a Conventional Commit
+        env:
+          # Via env, never inlined into the script: a PR title is untrusted
+          # input and would otherwise be a shell injection.
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|perf|revert|refactor|docs|test|build|ci|chore|style)(\([a-z0-9._/-]+\))?!?: .+'
+          if [[ $TITLE =~ $pattern ]]; then
+            echo "OK: $TITLE"
+            exit 0
+          fi
+          cat >&2 <<EOF
+          PR title is not a Conventional Commit:
+
+              $TITLE
+
+          It is squashed into main as the commit subject, and release-please
+          reads it to decide the next version. Use:
+
+              <type>[optional (scope)][optional !]: <description>
+
+          feat:     a user-visible feature      -> minor version bump
+          fix:      a user-visible bug fix      -> patch version bump
+          !         a breaking change           -> see docs/deployment.md
+          perf, refactor, docs, test, build, ci, chore, style, revert
+                    -> no release on their own
+
+          Examples:
+              feat: fade sounds in when playback starts
+              fix(audio): keep focus when a call interrupts playback
+              chore(deps): bump media3 to 1.11.0
+          EOF
+          exit 1

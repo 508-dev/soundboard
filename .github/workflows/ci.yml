@@ -39,6 +39,12 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
+      # Cheap, and the failure it prevents is expensive: a versionCode that
+      # does not match version.txt either blocks the release build or, worse,
+      # ships a version number Play will refuse to supersede.
+      - name: Check derived version files
+        run: ./scripts/sync-version.sh --check
+
       - name: ktlint
         run: ./gradlew ktlintCheck
 

@@ -1,0 +1,5 @@
+Features:
+
+- Mix any number of looping sounds at once, each with its own volume
+- Keep playing in the background from a foreground service, with a "Stop all" notification
+- Reorder, rename, and sort the board

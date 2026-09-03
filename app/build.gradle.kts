@@ -12,6 +12,36 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+// Release signing material, or null when none is configured. Two sources, both
+// optional: a local `keystore.properties` (see `keystore.properties.example`)
+// for signing side-load builds from a workstation, and `SOUNDBOARD_KEYSTORE_*`
+// environment variables for CI, which holds the key in GitHub secrets and never
+// materialises a properties file. `keystore.properties` wins when both are
+// present. With neither, a release build comes out unsigned — which is exactly
+// what F-Droid's build server wants, since it signs its own binary.
+val releaseSigning: Map<String, String>? =
+    run {
+        val fromFile =
+            rootProject.file("keystore.properties").takeIf { it.exists() }?.let { file ->
+                val props = Properties().apply { file.inputStream().use(::load) }
+                listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+                    .associateWith { props.getProperty(it) }
+            }
+        // providers.environmentVariable, not System.getenv: the latter is opaque
+        // to the configuration cache, which is on for this build.
+        val fromEnv =
+            mapOf(
+                "storeFile" to "SOUNDBOARD_KEYSTORE_FILE",
+                "storePassword" to "SOUNDBOARD_KEYSTORE_PASSWORD",
+                "keyAlias" to "SOUNDBOARD_KEY_ALIAS",
+                "keyPassword" to "SOUNDBOARD_KEY_PASSWORD",
+            ).mapValues { (_, name) -> providers.environmentVariable(name).orNull }
+
+        listOfNotNull(fromFile, fromEnv)
+            .firstOrNull { material -> material.values.none { it.isNullOrBlank() } }
+            ?.mapValues { (_, value) -> value!! }
+    }
+
 android {
     namespace = "dev.co508.soundboard"
     compileSdk = 37
@@ -24,7 +54,13 @@ android {
         // reach requirement below that floor.
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        // Both literals are generated from `version.txt` by
+        // `scripts/sync-version.sh` and re-checked by CI — don't hand-edit them.
+        // release-please owns version.txt; versionCode is derived from it as
+        // major * 1000000 + minor * 1000 + patch. They have to stay plain
+        // literals on their own lines because F-Droid's update bot regex-parses
+        // both straight out of this file (see docs/deployment.md).
+        versionCode = 1000
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -38,21 +74,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // Release signing is opt-in and local: see keystore.properties.example.
-            // Unsigned release builds are still buildable for CI/verification.
-            val keystorePropertiesFile = rootProject.file("keystore.properties")
-            if (keystorePropertiesFile.exists()) {
-                val keystoreProperties =
-                    Properties().apply {
-                        load(keystorePropertiesFile.inputStream())
+            releaseSigning?.let { material ->
+                signingConfig =
+                    signingConfigs.create("release") {
+                        storeFile = rootProject.file(material.getValue("storeFile"))
+                        storePassword = material.getValue("storePassword")
+                        keyAlias = material.getValue("keyAlias")
+                        keyPassword = material.getValue("keyPassword")
                     }
-                signingConfigs.create("release") {
-                    storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
-                    storePassword = keystoreProperties.getProperty("storePassword")
-                    keyAlias = keystoreProperties.getProperty("keyAlias")
-                    keyPassword = keystoreProperties.getProperty("keyPassword")
-                }
-                signingConfig = signingConfigs.getByName("release")
             }
         }
         debug {
@@ -71,6 +100,15 @@ android {
         compose = true
         // BuildConfig.VERSION_NAME is shown on the About screen.
         buildConfig = true
+    }
+
+    // Google's dependency-info blob is an opaque, Google-signed binary stapled
+    // into the artifact. F-Droid treats that as a non-free element in an
+    // otherwise free build, and it defeats reproducibility. Off for both
+    // outputs — nothing in this app reads it.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     packaging {

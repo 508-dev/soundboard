@@ -300,6 +300,66 @@ on) has no built-in list-reorder API. Revisit if a future Foundation release
 ships one; hand-rolled swap-threshold math is the kind of code that's fine to
 delete in favor of a first-party API.
 
+## Releases Are Gated By A Release PR, Not By Merging To Main
+
+Merging to `main` grooms a standing release PR; merging *that* PR is what tags a
+version and publishes. The alternative — release on every merge to `main` — was
+rejected for two reasons. It makes every merge a public release, with no way to
+batch three commits into one version. And it needs CI to push a version-bump
+commit directly to `main`, which means either leaving `main` unprotected or
+granting a bot a branch-protection bypass. The release-PR model needs neither:
+the bot only ever opens a PR, and a human merge is the deliberate act.
+
+Both jobs live in one workflow run, which reads oddly until you know why: a tag
+or PR created with `GITHUB_TOKEN` does not trigger another workflow. A separate
+tag-triggered publish workflow is the obvious design and silently never fires.
+
+## `versionCode` Is Derived From `version.txt`, And Stays A Literal
+
+`version.txt` is the source of truth; `versionCode` is computed from it as
+`major * 1000000 + minor * 1000 + patch` by `scripts/sync-version.sh`. Deriving
+it means it cannot drift from the version name, and it rises with any semver
+bump — which matters because Play permanently rejects a `versionCode` it has
+already seen for an app, including from a deleted release.
+
+The obvious tidier implementation is to compute it inside `app/build.gradle.kts`
+from `versionName`. That was rejected: F-Droid's update bot regex-parses
+`versionCode` and `versionName` textually out of the Gradle file to notice a new
+version, so an expression there ends automatic f-droid.org releases with no
+error anywhere. Generating literals into the file keeps both properties. CI runs
+`scripts/sync-version.sh --check` so the generated values cannot go stale.
+
+## Two F-Droid Paths, Because Neither Alone Is Enough
+
+The app publishes to a self-hosted F-Droid repository on `gh-pages` *and* is
+submitted to f-droid.org. They solve different halves of the problem.
+
+f-droid.org gives discovery — users find the app by searching in the client they
+already have — but nothing can be pushed to it from CI. It builds and signs on
+its own infrastructure, on its own schedule, and each release reaches users days
+later. The self-hosted repository is the opposite: fully automated and live
+within minutes of a release, but users must add a URL by hand.
+
+The cost of running both is that they sign with different keys, so a user cannot
+switch between them without uninstalling. That is inherent to f-droid.org's
+build model, not to this choice; F-Droid's reproducible-builds process is the
+eventual fix.
+
+The self-hosted repo is a git branch rather than a deployed directory because an
+F-Droid repository is cumulative — every published version stays in the index —
+so each run must add to the previous state rather than replace it.
+
+## Store Copy Lives In `fastlane/`, Not In Each Store's Own Format
+
+Play, the self-hosted F-Droid repo, and f-droid.org all need the same listing
+text and per-release notes in three different layouts. All three can read (or be
+fed from) the `fastlane/metadata/android/<locale>/` convention, so that is the
+one place the copy is written. `scripts/fdroid-publish.sh` copies it into the
+layout fdroidserver wants; the release workflow renames the changelog into the
+`whatsnew-<locale>` layout Play wants; f-droid.org reads it from the repo
+directly. Keeping per-store copies in the F-Droid metadata YAML would have been
+less machinery and three things to keep in step.
+
 ## Deferred: Instrumented (`androidTest`) Coverage
 
 Unit tests cover the pure logic: library mutations, persistence round-trips and

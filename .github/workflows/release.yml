@@ -1,0 +1,218 @@
+# Versioning and publishing. Merges to main only groom a release PR; merging
+# that PR is what tags a version and ships it. See docs/deployment.md.
+#
+#   merge a PR to main
+#     -> release-please opens/updates "chore(main): release X.Y.Z"
+#        (version.txt + CHANGELOG.md, topped up with the files derived from them)
+#     -> you merge that PR when you want to ship
+#        -> release-please tags vX.Y.Z and creates the GitHub Release
+#           -> publish: signed APK + AAB -> Release assets, Play, F-Droid
+#
+# Both jobs run in the same workflow run on purpose. A tag or PR created with
+# GITHUB_TOKEN does not start a new workflow, so a separate tag-triggered
+# publish workflow would silently never fire.
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Never let two releases interleave: they push to the same branches and the
+# same F-Droid index. Queue instead of cancelling — a cancelled publish leaves
+# a tagged release with no artifacts.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.release.outputs.releases_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          # A PAT is strongly preferred here: a PR opened with GITHUB_TOKEN does
+          # not trigger CI, so the release PR would merge unchecked. Falls back
+          # to GITHUB_TOKEN so the workflow still works before one is set up.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # release-please only knows how to bump version.txt and CHANGELOG.md.
+      # The Gradle version literals and the store release notes are derived from
+      # those two, so top the PR up before anyone merges it. `publish` re-checks
+      # this and refuses to ship if they ever drift apart.
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        if: ${{ steps.release.outputs.pr }}
+        with:
+          ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+          # Credentials are kept here, unlike every other checkout in this repo:
+          # this step exists to push back to the release branch.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Sync derived version files into the release PR
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          ./scripts/sync-version.sh
+          if git diff --quiet; then
+            echo "derived files already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: sync versionCode and store release notes"
+          git push
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      # Attach assets to the release, and push the F-Droid repo to gh-pages.
+      contents: write
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          # Build the tag, not whatever main has drifted to since.
+          ref: ${{ needs.release-please.outputs.tag }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      # The APK, the Play listing, and the F-Droid index all key off these
+      # numbers. Getting them wrong is not recoverable after publication:
+      # Play permanently rejects a versionCode it has already seen.
+      - name: Check the derived version files
+        run: ./scripts/sync-version.sh --check
+
+      - name: Work out what is configured
+        id: targets
+        env:
+          KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          # Publishing degrades gracefully while the store accounts are still
+          # being set up: no signing key means source-only release notes, and
+          # no Play credentials means F-Droid and GitHub still get the build.
+          signing=$([ -n "$KEYSTORE" ] && echo true || echo false)
+          play=$([ -n "$PLAY" ] && echo true || echo false)
+          echo "signing=$signing" >> "$GITHUB_OUTPUT"
+          echo "play=$play" >> "$GITHUB_OUTPUT"
+          echo "signing=$signing, play=$play" >> "$GITHUB_STEP_SUMMARY"
+          [ "$signing" = true ] || echo "::warning::RELEASE_KEYSTORE_BASE64 is not set — skipping all publishing."
+
+      - name: Restore the signing keystore
+        if: steps.targets.outputs.signing == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        run: |
+          # Strip whitespace first: a secret pasted with a trailing newline is
+          # the single most common way this step fails.
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d \
+            > "$RUNNER_TEMP/release.keystore"
+          # Prove the keystore and password actually work. Otherwise a truncated
+          # or mis-pasted secret surfaces much later, during signing, as a far
+          # less obvious error.
+          keytool -list -keystore "$RUNNER_TEMP/release.keystore" \
+            -storepass "$KEYSTORE_PASSWORD" > /dev/null
+
+      - name: Build the signed APK and AAB
+        if: steps.targets.outputs.signing == 'true'
+        env:
+          SOUNDBOARD_KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          SOUNDBOARD_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          SOUNDBOARD_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          SOUNDBOARD_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease bundleRelease
+
+      - name: Collect the artifacts
+        if: steps.targets.outputs.signing == 'true'
+        id: artifacts
+        run: |
+          eval "$(./scripts/sync-version.sh --print)"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk "dist/soundboard-${version}.apk"
+          cp app/build/outputs/bundle/release/app-release.aab "dist/soundboard-${version}.aab"
+          # Publish the APK's hash so a side-loader can check what they got.
+          (cd dist && sha256sum "soundboard-${version}.apk" > "soundboard-${version}.apk.sha256")
+          # Same release notes as F-Droid gets, renamed into the layout Play
+          # wants (whatsnew-<locale>, not <versionCode>.txt).
+          mkdir -p dist/whatsnew
+          for notes in fastlane/metadata/android/*/changelogs/"${version_code}.txt"; do
+            locale=$(basename "$(dirname "$(dirname "$notes")")")
+            cp "$notes" "dist/whatsnew/whatsnew-${locale}"
+          done
+          echo "apk=dist/soundboard-${version}.apk" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${version_code}" >> "$GITHUB_OUTPUT"
+
+      - name: Attach the APK to the GitHub Release
+        if: steps.targets.outputs.signing == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+          APK: ${{ steps.artifacts.outputs.apk }}
+        run: |
+          # The AAB is deliberately not attached: it is only useful to Play, and
+          # publishing it invites people to try to install a file they cannot.
+          gh release upload "$TAG" "$APK" "$APK.sha256" --clobber
+
+      - name: Upload to Google Play (internal track)
+        if: steps.targets.outputs.signing == 'true' && steps.targets.outputs.play == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: dev.co508.soundboard
+          releaseFiles: dist/soundboard-${{ steps.artifacts.outputs.version }}.aab
+          track: internal
+          status: completed
+          # R8 is on for release builds, so without this every Play crash report
+          # comes back as unreadable obfuscated stack traces.
+          mappingFile: app/build/outputs/mapping/release/mapping.txt
+          whatsNewDirectory: dist/whatsnew
+
+      - name: Publish to the self-hosted F-Droid repository
+        if: steps.targets.outputs.signing == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FDROID_KEYSTORE: ${{ runner.temp }}/release.keystore
+          FDROID_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          FDROID_KEYSTORE_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          FDROID_KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          APK: ${{ steps.artifacts.outputs.apk }}
+        run: |
+          # Pinned: fdroidserver decides the on-disk layout and index format of
+          # a published repository, so an unattended upgrade is not something to
+          # find out about from a broken index.
+          python3 -m venv "$RUNNER_TEMP/fdroid-venv"
+          "$RUNNER_TEMP/fdroid-venv/bin/pip" install --quiet fdroidserver==2.4.5
+          PATH="$RUNNER_TEMP/fdroid-venv/bin:$PATH" ./scripts/fdroid-publish.sh "$APK"

@@ -1,0 +1,32 @@
+# Configuration for the self-hosted F-Droid repository published from this
+# repo's `gh-pages` branch and served by GitHub Pages.
+#
+# `scripts/fdroid-publish.sh` copies this file into the gh-pages checkout at
+# publish time and never commits it there, so the signing material below is
+# only ever resolved on the runner. `{env: NAME}` is fdroidserver's own
+# indirection for exactly this — nothing secret is stored in this file.
+#
+# This is NOT the f-droid.org submission. That is a separate metadata file,
+# `fdroid/fdroiddata/dev.co508.soundboard.yml`; see docs/deployment.md for how
+# the two differ and why both exist.
+
+repo_url: https://508-dev.github.io/soundboard/fdroid/repo
+repo_name: 508.dev Soundboard
+repo_description: >-
+  Release builds of 508.dev Soundboard, signed with the same key as the APKs
+  attached to its GitHub Releases — so you can move between the two without
+  uninstalling. Built and published from CI on every tagged release.
+repo_icon: icon.png
+
+# Keep every published version in the main index rather than rolling older ones
+# into an archive repo users would have to subscribe to separately. This is one
+# small app; the index stays tiny either way.
+archive_older: 0
+
+# The index is signed with the app's own release key (see docs/secrets.md for
+# the tradeoff that accepts). Clients pin this key as the repo's fingerprint,
+# so rotating it forces every user to re-add the repository.
+keystore: {env: FDROID_KEYSTORE}
+repo_keyalias: {env: FDROID_KEY_ALIAS}
+keystorepass: {env: FDROID_KEYSTORE_PASS}
+keypass: {env: FDROID_KEY_PASS}

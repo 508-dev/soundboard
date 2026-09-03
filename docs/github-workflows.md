@@ -12,8 +12,9 @@ Root `.github/` files are meant to be safe defaults for most repositories:
 - `.github/ISSUE_TEMPLATE/feature_request.yml`: captures product or workflow requests.
 - `.github/ISSUE_TEMPLATE/docs_request.yml`: captures documentation gaps.
 - `.github/ISSUE_TEMPLATE/config.yml`: keeps blank issues allowed and documents where to add discussion links.
-- `.github/workflows/ci.yml`: ktlint, unit tests, Android lint, and a debug
-  APK build via `./gradlew`. See `docs/tooling.md` for the pinned toolchain.
+- `.github/workflows/ci.yml`: version-file check, ktlint, unit tests, Android
+  lint, and a debug APK build via `./gradlew`. See `docs/tooling.md` for the
+  pinned toolchain.
 
 Keep these templates short. They should improve issue and PR quality without making lightweight collaboration feel bureaucratic.
 
@@ -27,6 +28,24 @@ If path-filtered jobs are used with branch protection, require a final aggregate
 job such as `ci-passed` instead of requiring every skipped job directly.
 When using `dorny/paths-filter` without `pull-requests: read`, set `token: ""`
 and check out enough history so the action uses git-based detection.
+
+## Release Workflows
+
+Not devkit defaults — these are specific to shipping this app, and
+`docs/deployment.md` is the reference for them.
+
+- `.github/workflows/release.yml`: release-please grooms a release PR on every
+  merge to `main`; merging that PR tags a version and publishes to GitHub
+  Releases, Google Play, and the self-hosted F-Droid repository. Both jobs are
+  in one workflow because a tag or PR created with `GITHUB_TOKEN` does not
+  trigger a new workflow run.
+- `.github/workflows/pr-title.yml`: checks the PR title is a Conventional
+  Commit, since squash-merging makes it the commit subject release-please reads.
+  Deliberately a plain regex rather than a third-party action — a release-gating
+  check is a poor place to add a supply-chain dependency.
+
+`release.yml` is the only workflow here that needs write permissions or
+secrets, and it scopes them per job.
 
 ## Security Extras
 

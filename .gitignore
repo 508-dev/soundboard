@@ -23,6 +23,9 @@ build/
 *.ap_
 *.dex
 
+# Release artifacts staged by .github/workflows/release.yml
+/dist/
+
 # Release signing (see keystore.properties.example)
 keystore.properties
 *.jks
