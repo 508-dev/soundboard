@@ -74,13 +74,22 @@ jobs:
         if: ${{ steps.release.outputs.pr }}
         run: |
           ./scripts/sync-version.sh
-          if git diff --quiet; then
+          # `git diff` alone misses a brand-new changelog file — it only shows
+          # tracked changes, and a new versionCode means a changelog that has
+          # never been committed before. `status --porcelain` catches both.
+          if [ -z "$(git status --porcelain)" ]; then
             echo "derived files already up to date"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: sync versionCode and store release notes"
+          # Explicit paths, not `-A`: these two are exactly what
+          # sync-version.sh writes, and only that. `commit -am` was the
+          # original bug here — `-a` stages modifications to already-tracked
+          # files only, so it silently dropped the new changelog file every
+          # time.
+          git add app/build.gradle.kts fastlane/metadata/android/*/changelogs/
+          git commit -m "chore: sync versionCode and store release notes"
           git push
 
   publish:
