@@ -1,0 +1,96 @@
+{
+  "repo": {
+    "timestamp": 1788427237000,
+    "version": 20002,
+    "name": "508.dev Soundboard",
+    "icon": "icon.png",
+    "address": "https://508-dev.github.io/soundboard/fdroid/repo",
+    "description": "Release builds of 508.dev Soundboard, signed with the same key as the APKs attached to its GitHub Releases \u2014 so you can move between the two without uninstalling. Built and published from CI on every tagged release."
+  },
+  "requests": {
+    "install": [],
+    "uninstall": []
+  },
+  "apps": [
+    {
+      "authorEmail": "caleb@508.dev",
+      "authorName": "508.dev",
+      "authorWebSite": "https://508.dev",
+      "categories": [
+        "Multimedia"
+      ],
+      "changelog": "https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md",
+      "suggestedVersionName": "0.1.1",
+      "suggestedVersionCode": "1001",
+      "issueTracker": "https://github.com/508-dev/soundboard/issues",
+      "license": "GPL-3.0-only",
+      "sourceCode": "https://github.com/508-dev/soundboard",
+      "webSite": "https://508.dev",
+      "added": 1788427235000,
+      "packageName": "dev.co508.soundboard",
+      "lastUpdated": 1788427235000,
+      "localized": {
+        "en-US": {
+          "description": "Soundboard mixes looping sounds from your own audio files. Play any number of\nthem at the same time and set each one's volume independently \u2014 rain under a\nfan under a cafe, at whatever balance you like.\n\nBuilt for tabletop-gaming ambience and for sleep soundscapes, but it will loop\nanything you point it at.\n\n<b>What it does</b>\n\n* Add sounds with the + button. The system file picker accepts a\n  multi-selection, so a whole folder of ambience lands in one go.\n* Play any combination at once. Each row has its own play/pause toggle, and\n  sounds loop until you stop them.\n* Set each sound's volume by tapping its volume pill and dragging around the\n  dial. The percentage is relative: your device's volume keys still move the\n  whole mix together, and each sound keeps its balance within it.\n* Keeps playing in the background with the screen off. A notification shows how\n  many sounds are running and offers \"Stop all\".\n* Reorder, rename, and sort the board to taste.\n\n<b>Your files stay yours</b>\n\nSoundboard never copies or moves your audio. It remembers where each file is\nand reads it in place, using only the per-file permission you granted when you\npicked it. It never asks for broad storage access.\n\n<b>Private by construction</b>\n\nThe app requests no INTERNET permission at all, so it cannot phone home even by\naccident. No account, no network calls, no telemetry, no ads, no tracking.\n\n<b>Free software</b>\n\nReleased under the GNU General Public License v3 by 508.dev, a worker-owned\nsoftware co-op. The source is on GitHub \u2014 read it, build it, change it.\n",
+          "name": "508.dev Soundboard",
+          "phoneScreenshots": [
+            "1.png",
+            "2.png"
+          ],
+          "summary": "Mix looping ambient sounds, each at its own volume. Offline, free, no ads.",
+          "whatsNew": "Bug Fixes:\n\n- commit the changelog file\n- update correct release stuff\n"
+        }
+      }
+    }
+  ],
+  "packages": {
+    "dev.co508.soundboard": [
+      {
+        "added": 1788427235000,
+        "apkName": "soundboard-0.1.1.apk",
+        "hash": "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0",
+        "hashType": "sha256",
+        "minSdkVersion": 26,
+        "nativecode": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86",
+          "x86_64"
+        ],
+        "packageName": "dev.co508.soundboard",
+        "sig": "092c92a7780dc21a6841e96dadf5cf94",
+        "signer": "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267",
+        "size": 2207717,
+        "targetSdkVersion": 36,
+        "uses-permission": [
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "dev.co508.soundboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ]
+        ],
+        "versionCode": 1001,
+        "versionName": "0.1.1"
+      }
+    ]
+  }
+}

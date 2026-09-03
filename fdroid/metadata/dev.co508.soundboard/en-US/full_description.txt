@@ -1,0 +1,35 @@
+Soundboard mixes looping sounds from your own audio files. Play any number of
+them at the same time and set each one's volume independently — rain under a
+fan under a cafe, at whatever balance you like.
+
+Built for tabletop-gaming ambience and for sleep soundscapes, but it will loop
+anything you point it at.
+
+<b>What it does</b>
+
+* Add sounds with the + button. The system file picker accepts a
+  multi-selection, so a whole folder of ambience lands in one go.
+* Play any combination at once. Each row has its own play/pause toggle, and
+  sounds loop until you stop them.
+* Set each sound's volume by tapping its volume pill and dragging around the
+  dial. The percentage is relative: your device's volume keys still move the
+  whole mix together, and each sound keeps its balance within it.
+* Keeps playing in the background with the screen off. A notification shows how
+  many sounds are running and offers "Stop all".
+* Reorder, rename, and sort the board to taste.
+
+<b>Your files stay yours</b>
+
+Soundboard never copies or moves your audio. It remembers where each file is
+and reads it in place, using only the per-file permission you granted when you
+picked it. It never asks for broad storage access.
+
+<b>Private by construction</b>
+
+The app requests no INTERNET permission at all, so it cannot phone home even by
+accident. No account, no network calls, no telemetry, no ads, no tracking.
+
+<b>Free software</b>
+
+Released under the GNU General Public License v3 by 508.dev, a worker-owned
+software co-op. The source is on GitHub — read it, build it, change it.

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fdroid>
+	<repo icon="icon.png" name="508.dev Soundboard" pubkey="3082037a30820262a003020102020900c66c7c19ae52a6c5300d06092a864886f70d01010c0500306a310b3009060355040613025457310f300d06035504081306546169706569310f300d060355040713065461697065693110300e060355040a13073530382e6465763110300e060355040b13073530382e646576311530130603550403130c43616c656220526f676572733020170d3236303930333034313730395a180f32303534303131393034313730395a306a310b3009060355040613025457310f300d06035504081306546169706569310f300d060355040713065461697065693110300e060355040a13073530382e6465763110300e060355040b13073530382e646576311530130603550403130c43616c656220526f6765727330820122300d06092a864886f70d01010105000382010f003082010a0282010100bb6a634c0d6729d6eecd87446639ffa68963c33e5a1fe41adc04d7ba847b17e871a602ee8b2ae05f2da0963efd3724966e844b4b83303d42acf8acb3cd33d8effab574c11e9f340acd8ac2297e12d3b9195fcd79f99cbcafdb6c5e495123ee60e9aa0c6388c45822bcbff6e2f789b835a45360e315de65b16d4a606788783a8f129b16c8bebd30d2779cf7e096e4e8689b545f68c8496b2ab830b8930444135321a1792107fd095e27be8beef3dbe19afe5e794103176f2485776e2ede1c455329a10a1d6f8d8521c3432756bbcb51a3db7c3f1bea2d9c8563930abdaa203423aa6602bcfd8e8e73e8cc8194f7543035e41da384f5543ecfb572e5dd08c797870203010001a321301f301d0603551d0e041604144ab685bf1b413a6ad1bf9eae22150b932c7e43b2300d06092a864886f70d01010c050003820101005517e1dc05271d9a17d5fc95475a084fe035e7302f7133c03ea49897a6aa2b22be8b16396d8e33b47e182fda5ecbcb181960a3d835137382da1db885b2b513d99214b07842121f514a33b3bfac250c4bd207a4c2d5b301a411ab83bcd7a7f7030bd47c99abe0a8998ac3ae919985be5ff7f72db09c5bcb7daf49478a19bfe6f3a578b785d92842cae464683f4a20e5a13f82708686bc3dcc54e8e65e45a06d83136e8a2019635c468285666986765ef53771641d0f41de05be6c754c8d2dab37944bb53c67cb3723d6a52cec7d2568c5d2c20f85e85b47bbf983cec9a06fafc041383a034d4232144560347c4ed2b75d8d25411278a4d110107203a68ec207cf" timestamp="1788427237" url="https://508-dev.github.io/soundboard/fdroid/repo" version="20002">
+		<description>Release builds of 508.dev Soundboard, signed with the same key as the APKs attached to its GitHub Releases — so you can move between the two without uninstalling. Built and published from CI on every tagged release.</description>
+	</repo>
+	<application id="dev.co508.soundboard">
+		<id>dev.co508.soundboard</id>
+		<added>2026-09-03</added>
+		<lastupdated>2026-09-03</lastupdated>
+		<name>508.dev Soundboard</name>
+		<summary>Mix looping ambient sounds, each at its own volume. Offline, free, no ads.</summary>
+		<desc>Soundboard mixes looping sounds from your own audio files. Play any number of
+them at the same time and set each one's volume independently — rain under a
+fan under a cafe, at whatever balance you like.
+
+Built for tabletop-gaming ambience and for sleep soundscapes, but it will loop
+anything you point it at.
+
+&lt;b&gt;What it does&lt;/b&gt;
+
+* Add sounds with the + button. The system file picker accepts a
+  multi-selection, so a whole folder of ambience lands in one go.
+* Play any combination at once. Each row has its own play/pause toggle, and
+  sounds loop until you stop them.
+* Set each sound's volume by tapping its volume pill and dragging around the
+  dial. The percentage is relative: your device's volume keys still move the
+  whole mix together, and each sound keeps its balance within it.
+* Keeps playing in the background with the screen off. A notification shows how
+  many sounds are running and offers &quot;Stop all&quot;.
+* Reorder, rename, and sort the board to taste.
+
+&lt;b&gt;Your files stay yours&lt;/b&gt;
+
+Soundboard never copies or moves your audio. It remembers where each file is
+and reads it in place, using only the per-file permission you granted when you
+picked it. It never asks for broad storage access.
+
+&lt;b&gt;Private by construction&lt;/b&gt;
+
+The app requests no INTERNET permission at all, so it cannot phone home even by
+accident. No account, no network calls, no telemetry, no ads, no tracking.
+
+&lt;b&gt;Free software&lt;/b&gt;
+
+Released under the GNU General Public License v3 by 508.dev, a worker-owned
+software co-op. The source is on GitHub — read it, build it, change it.
+</desc>
+		<license>GPL-3.0-only</license>
+		<categories>Multimedia</categories>
+		<category>Multimedia</category>
+		<web>https://508.dev</web>
+		<source>https://github.com/508-dev/soundboard</source>
+		<tracker>https://github.com/508-dev/soundboard/issues</tracker>
+		<changelog>https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md</changelog>
+		<author>508.dev</author>
+		<email>caleb@508.dev</email>
+		<marketversion>0.1.1</marketversion>
+		<marketvercode>1001</marketvercode>
+		<package>
+			<version>0.1.1</version>
+			<versioncode>1001</versioncode>
+			<apkname>soundboard-0.1.1.apk</apkname>
+			<hash type="sha256">0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0</hash>
+			<size>2207717</size>
+			<sdkver>26</sdkver>
+			<targetSdkVersion>36</targetSdkVersion>
+			<added>2026-09-03</added>
+			<sig>092c92a7780dc21a6841e96dadf5cf94</sig>
+			<permissions>ACCESS_NETWORK_STATE,FOREGROUND_SERVICE,FOREGROUND_SERVICE_MEDIA_PLAYBACK,POST_NOTIFICATIONS,WAKE_LOCK,dev.co508.soundboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</permissions>
+			<nativecode>arm64-v8a,armeabi-v7a,x86,x86_64</nativecode>
+		</package>
+	</application>
+</fdroid>

@@ -23,3 +23,11 @@ Changelog: https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md
 
 RepoType: git
 Repo: https://github.com/508-dev/soundboard.git
+
+# Appended at publish time by scripts/fdroid-publish.sh.
+CurrentVersion: 0.1.1
+CurrentVersionCode: 1001
+Builds:
+  - versionName: 0.1.1
+    versionCode: 1001
+    commit: v0.1.1

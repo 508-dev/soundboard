@@ -1,0 +1,123 @@
+{
+  "repo": {
+    "name": {
+      "en-US": "508.dev Soundboard"
+    },
+    "description": {
+      "en-US": "Release builds of 508.dev Soundboard, signed with the same key as the APKs attached to its GitHub Releases — so you can move between the two without uninstalling. Built and published from CI on every tagged release."
+    },
+    "icon": {
+      "en-US": {
+        "name": "/icons/icon.png",
+        "sha256": "9879b2fadd43a969a4a223f6c6fa28348c9f8751a2ac26c8753ef36463c44b95",
+        "size": 808
+      }
+    },
+    "address": "https://508-dev.github.io/soundboard/fdroid/repo",
+    "timestamp": 1788427237000,
+    "categories": {
+      "Multimedia": {
+        "name": {
+          "en-US": "Multimedia"
+        }
+      }
+    }
+  },
+  "packages": {
+    "dev.co508.soundboard": {
+      "metadata": {
+        "added": 1788427235000,
+        "categories": [
+          "Multimedia"
+        ],
+        "changelog": "https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md",
+        "issueTracker": "https://github.com/508-dev/soundboard/issues",
+        "lastUpdated": 1788427235000,
+        "license": "GPL-3.0-only",
+        "sourceCode": "https://github.com/508-dev/soundboard",
+        "webSite": "https://508.dev",
+        "screenshots": {
+          "phone": {
+            "en-US": [
+              {
+                "name": "/dev.co508.soundboard/en-US/phoneScreenshots/1.png",
+                "sha256": "13b2f3fef0abd275416f6a679014b56432732ad36842ca8a917376490379bc86",
+                "size": 183462
+              },
+              {
+                "name": "/dev.co508.soundboard/en-US/phoneScreenshots/2.png",
+                "sha256": "0fc3bedf022732c4a732a012919a162db6e650a4cbe4bcefbcbfeb7bf2865a03",
+                "size": 127928
+              }
+            ]
+          }
+        },
+        "authorEmail": "caleb@508.dev",
+        "authorName": "508.dev",
+        "authorWebSite": "https://508.dev",
+        "name": {
+          "en-US": "508.dev Soundboard"
+        },
+        "summary": {
+          "en-US": "Mix looping ambient sounds, each at its own volume. Offline, free, no ads."
+        },
+        "description": {
+          "en-US": "Soundboard mixes looping sounds from your own audio files. Play any number of\nthem at the same time and set each one's volume independently — rain under a\nfan under a cafe, at whatever balance you like.\n\nBuilt for tabletop-gaming ambience and for sleep soundscapes, but it will loop\nanything you point it at.\n\n<b>What it does</b>\n\n* Add sounds with the + button. The system file picker accepts a\n  multi-selection, so a whole folder of ambience lands in one go.\n* Play any combination at once. Each row has its own play/pause toggle, and\n  sounds loop until you stop them.\n* Set each sound's volume by tapping its volume pill and dragging around the\n  dial. The percentage is relative: your device's volume keys still move the\n  whole mix together, and each sound keeps its balance within it.\n* Keeps playing in the background with the screen off. A notification shows how\n  many sounds are running and offers \"Stop all\".\n* Reorder, rename, and sort the board to taste.\n\n<b>Your files stay yours</b>\n\nSoundboard never copies or moves your audio. It remembers where each file is\nand reads it in place, using only the per-file permission you granted when you\npicked it. It never asks for broad storage access.\n\n<b>Private by construction</b>\n\nThe app requests no INTERNET permission at all, so it cannot phone home even by\naccident. No account, no network calls, no telemetry, no ads, no tracking.\n\n<b>Free software</b>\n\nReleased under the GNU General Public License v3 by 508.dev, a worker-owned\nsoftware co-op. The source is on GitHub — read it, build it, change it.\n"
+        },
+        "preferredSigner": "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267"
+      },
+      "versions": {
+        "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0": {
+          "added": 1788427235000,
+          "file": {
+            "name": "/soundboard-0.1.1.apk",
+            "sha256": "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0",
+            "size": 2207717
+          },
+          "manifest": {
+            "nativecode": [
+              "arm64-v8a",
+              "armeabi-v7a",
+              "x86",
+              "x86_64"
+            ],
+            "versionName": "0.1.1",
+            "versionCode": 1001,
+            "usesSdk": {
+              "minSdkVersion": 26,
+              "targetSdkVersion": 36
+            },
+            "signer": {
+              "sha256": [
+                "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267"
+              ]
+            },
+            "usesPermission": [
+              {
+                "name": "android.permission.FOREGROUND_SERVICE"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+              },
+              {
+                "name": "android.permission.POST_NOTIFICATIONS"
+              },
+              {
+                "name": "dev.co508.soundboard.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+              },
+              {
+                "name": "android.permission.ACCESS_NETWORK_STATE"
+              },
+              {
+                "name": "android.permission.WAKE_LOCK"
+              }
+            ]
+          },
+          "whatsNew": {
+            "en-US": "Bug Fixes:\n\n- commit the changelog file\n- update correct release stuff\n"
+          }
+        }
+      }
+    }
+  }
+}
