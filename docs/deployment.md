@@ -182,6 +182,14 @@ builder rather than ours:
 - `./gradlew assembleRelease` must work from a clean checkout with no
   `keystore.properties` and no network beyond declared Gradle dependencies.
 
+Native-library stripping is already handled: `app/build.gradle.kts` sets
+`packaging { jniLibs { keepDebugSymbols += "**/*.so" } }`, so the prebuilt `.so`
+files arriving via AARs (androidx datastore, graphics-path) are packaged exactly
+as upstream shipped them instead of being re-stripped by whichever NDK the
+builder happens to have. Without it, F-Droid's APK check flags those libraries
+as differing from ours. See
+<https://f-droid.org/docs/Reproducible_Builds/#native-library-stripping>.
+
 ## Cutting A Release By Hand
 
 If the automation is broken and something has to ship:

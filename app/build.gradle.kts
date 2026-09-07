@@ -115,6 +115,19 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        // We ship no native code of our own, but AGP still runs its NDK strip
+        // over the prebuilt `.so` files that come in via AARs (androidx
+        // datastore and graphics-path). The strip output depends on the NDK
+        // version of whoever ran the build, so F-Droid's builder and ours
+        // disagree byte-for-byte on libraries neither of us compiled. Keeping
+        // the symbols leaves those files exactly as their AAR shipped them,
+        // which is the same on every machine. See
+        // https://f-droid.org/docs/Reproducible_Builds/#native-library-stripping
+        // (the doc's `packagingOptions { doNotStrip ... }` is the pre-AGP-8
+        // spelling of this block).
+        jniLibs {
+            keepDebugSymbols += "**/*.so"
+        }
     }
 }
 
