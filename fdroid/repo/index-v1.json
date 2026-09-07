@@ -1,6 +1,6 @@
 {
   "repo": {
-    "timestamp": 1788427237000,
+    "timestamp": 1788774696000,
     "version": 20002,
     "name": "508.dev Soundboard",
     "icon": "icon.png",
@@ -20,15 +20,15 @@
         "Multimedia"
       ],
       "changelog": "https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md",
-      "suggestedVersionName": "0.1.1",
-      "suggestedVersionCode": "1001",
+      "suggestedVersionName": "0.1.2",
+      "suggestedVersionCode": "1002",
       "issueTracker": "https://github.com/508-dev/soundboard/issues",
       "license": "GPL-3.0-only",
       "sourceCode": "https://github.com/508-dev/soundboard",
       "webSite": "https://508.dev",
-      "added": 1788427235000,
+      "added": 1788774694000,
       "packageName": "dev.co508.soundboard",
-      "lastUpdated": 1788427235000,
+      "lastUpdated": 1788774694000,
       "localized": {
         "en-US": {
           "description": "Soundboard mixes looping sounds from your own audio files. Play any number of\nthem at the same time and set each one's volume independently \u2014 rain under a\nfan under a cafe, at whatever balance you like.\n\nBuilt for tabletop-gaming ambience and for sleep soundscapes, but it will loop\nanything you point it at.\n\n<b>What it does</b>\n\n* Add sounds with the + button. The system file picker accepts a\n  multi-selection, so a whole folder of ambience lands in one go.\n* Play any combination at once. Each row has its own play/pause toggle, and\n  sounds loop until you stop them.\n* Set each sound's volume by tapping its volume pill and dragging around the\n  dial. The percentage is relative: your device's volume keys still move the\n  whole mix together, and each sound keeps its balance within it.\n* Keeps playing in the background with the screen off. A notification shows how\n  many sounds are running and offers \"Stop all\".\n* Reorder, rename, and sort the board to taste.\n\n<b>Your files stay yours</b>\n\nSoundboard never copies or moves your audio. It remembers where each file is\nand reads it in place, using only the per-file permission you granted when you\npicked it. It never asks for broad storage access.\n\n<b>Private by construction</b>\n\nThe app requests no INTERNET permission at all, so it cannot phone home even by\naccident. No account, no network calls, no telemetry, no ads, no tracking.\n\n<b>Free software</b>\n\nReleased under the GNU General Public License v3 by 508.dev, a worker-owned\nsoftware co-op. The source is on GitHub \u2014 read it, build it, change it.\n",
@@ -38,7 +38,7 @@
             "2.png"
           ],
           "summary": "Mix looping ambient sounds, each at its own volume. Offline, free, no ads.",
-          "whatsNew": "Bug Fixes:\n\n- commit the changelog file\n- update correct release stuff\n"
+          "whatsNew": "Bug Fixes:\n\n- oops forgot to trigger deploy\n- oops forgot to trigger deploy\n"
         }
       }
     }
@@ -46,9 +46,9 @@
   "packages": {
     "dev.co508.soundboard": [
       {
-        "added": 1788427235000,
-        "apkName": "soundboard-0.1.1.apk",
-        "hash": "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0",
+        "added": 1788774694000,
+        "apkName": "soundboard-0.1.2.apk",
+        "hash": "4d54eed6c63b8e02b9abd4b8d9d9587b7e8325aa08de831c8a23529c0cd09954",
         "hashType": "sha256",
         "minSdkVersion": 26,
         "nativecode": [
@@ -60,7 +60,7 @@
         "packageName": "dev.co508.soundboard",
         "sig": "092c92a7780dc21a6841e96dadf5cf94",
         "signer": "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267",
-        "size": 2207717,
+        "size": 2209801,
         "targetSdkVersion": 36,
         "uses-permission": [
           [
@@ -88,8 +88,8 @@
             null
           ]
         ],
-        "versionCode": 1001,
-        "versionName": "0.1.1"
+        "versionCode": 1002,
+        "versionName": "0.1.2"
       }
     ]
   }

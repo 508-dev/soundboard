@@ -14,7 +14,7 @@
       }
     },
     "address": "https://508-dev.github.io/soundboard/fdroid/repo",
-    "timestamp": 1788427237000,
+    "timestamp": 1788774696000,
     "categories": {
       "Multimedia": {
         "name": {
@@ -26,13 +26,13 @@
   "packages": {
     "dev.co508.soundboard": {
       "metadata": {
-        "added": 1788427235000,
+        "added": 1788774694000,
         "categories": [
           "Multimedia"
         ],
         "changelog": "https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md",
         "issueTracker": "https://github.com/508-dev/soundboard/issues",
-        "lastUpdated": 1788427235000,
+        "lastUpdated": 1788774694000,
         "license": "GPL-3.0-only",
         "sourceCode": "https://github.com/508-dev/soundboard",
         "webSite": "https://508.dev",
@@ -67,12 +67,12 @@
         "preferredSigner": "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267"
       },
       "versions": {
-        "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0": {
-          "added": 1788427235000,
+        "4d54eed6c63b8e02b9abd4b8d9d9587b7e8325aa08de831c8a23529c0cd09954": {
+          "added": 1788774694000,
           "file": {
-            "name": "/soundboard-0.1.1.apk",
-            "sha256": "0c1ebf2ac31182b80f3afb3b27df2040f72d106847907410abf5eeb5cc41c3c0",
-            "size": 2207717
+            "name": "/soundboard-0.1.2.apk",
+            "sha256": "4d54eed6c63b8e02b9abd4b8d9d9587b7e8325aa08de831c8a23529c0cd09954",
+            "size": 2209801
           },
           "manifest": {
             "nativecode": [
@@ -81,8 +81,8 @@
               "x86",
               "x86_64"
             ],
-            "versionName": "0.1.1",
-            "versionCode": 1001,
+            "versionName": "0.1.2",
+            "versionCode": 1002,
             "usesSdk": {
               "minSdkVersion": 26,
               "targetSdkVersion": 36
@@ -114,7 +114,7 @@
             ]
           },
           "whatsNew": {
-            "en-US": "Bug Fixes:\n\n- commit the changelog file\n- update correct release stuff\n"
+            "en-US": "Bug Fixes:\n\n- oops forgot to trigger deploy\n- oops forgot to trigger deploy\n"
           }
         }
       }
