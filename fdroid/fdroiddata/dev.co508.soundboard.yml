@@ -15,14 +15,14 @@ RepoType: git
 Repo: https://github.com/508-dev/soundboard.git
 
 Builds:
-  - versionName: 0.1.0
-    versionCode: 1000
-    commit: v0.1.0
+  - versionName: 0.1.2
+    versionCode: 1002
+    commit: ce7698e57a658752077c0f93468010a9fd6a1731
     subdir: app
     gradle:
       - yes
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.0
-CurrentVersionCode: 1000
+CurrentVersion: 0.1.2
+CurrentVersionCode: 1002

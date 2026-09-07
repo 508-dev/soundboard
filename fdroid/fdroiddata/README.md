@@ -17,15 +17,28 @@ instead.
 - **Nothing in this repo pushes to f-droid.org.** It builds and signs on its
   own infrastructure, on its own schedule, with its own key. This file is
   read once at merge time and from then on only by their bot.
-- **`UpdateCheckMode: Tags`** makes that bot watch this repo for new `v*` tags.
+- **`UpdateCheckMode: Tags`** makes that bot watch this repo for new tags.
+  Deliberately no tag pattern after it, because our tags are not uniformly
+  shaped: release-please is configured with `package-name: soundboard`, so
+  every tag it cuts is component-prefixed — `soundboard-v0.1.2`, not `v0.1.2`.
+  Only `v0.1.0` is bare, because that one was tagged by hand to baseline
+  release-please before it had ever run. A pattern like `v*` would match the
+  hand-cut baseline and miss every real release since.
 - **`AutoUpdateMode: Version`** (no tag pattern after it) makes it read
   `versionName`/`versionCode` out of `app/build.gradle.kts` at that tag and
   append a new `Builds:` entry itself — the reason those two values have to
   stay plain literals in that file, not an expression. An older syntax,
   `Version v%v`, supplied a commit-tag pattern; it's not valid on current
   fdroiddata schemas, and it was always redundant under `UpdateCheckMode:
-  Tags` anyway — `checkupdates` already knows the tag and assigns
-  `commit: <tag>` directly, ignoring the pattern.
+  Tags` anyway — `checkupdates` already knows the tag, and it resolves that tag
+  to a commit rather than writing the tag name.
+- **`commit:` is always a full 40-character hash, never a tag or branch.**
+  fdroiddata maintainers ask for this on review, and their own bot agrees:
+  `fdroid checkupdates --auto` writes `commit: ce7698e5…` for a tag it just
+  found. A tag is mutable — it can be moved or deleted after review, which
+  would silently change what F-Droid builds and signs. A hash cannot. Resolve
+  it with `git rev-list -n1 <tag>`; don't read it off `git log`, which tracks
+  the branch tip rather than the release.
 - **No `Summary`/`Description` fields.** F-Droid reads
   `fastlane/metadata/android/` from this repo instead, so the store copy has
   one source rather than three.

@@ -317,6 +317,10 @@ state once, after the setup commit lands on `main`:
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
+This baseline tag is bare on purpose — release-please has not run yet. Every
+tag it cuts afterwards is component-prefixed (`soundboard-v0.1.2`), so `v0.1.0`
+stays the odd one out forever. Don't infer a `v*` tag pattern from it.
+
 ## 6. F-Droid
 
 The self-hosted repository needs nothing beyond step 1 — the first release
