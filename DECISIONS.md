@@ -183,11 +183,13 @@ easier target on a phone, and it makes the card's ripple mean something. The
 volume percentage and long-press gesture keep their own handling, so the row tap
 is unambiguous.
 
-## Navigation Drawer Over Three Flat Destinations
+## Navigation Drawer Over Flat Destinations
 
-The board, About, and Licenses are siblings with no hierarchy, so a
+The board, How to use, About, and Licenses are siblings with no hierarchy, so a
 `ModalNavigationDrawer` behind a hamburger is the right container — it scales to
-a Settings or Presets entry later without restructuring anything.
+a Settings or Presets entry later without restructuring anything. The guide is a
+destination rather than a dialog so its longer, scrollable prose has room and
+system-back behaviour matches the other screens.
 
 Classic `navigation-compose` rather than local state, matching the sibling app.
 It costs one dependency, and buys correct system-back behaviour and
@@ -195,7 +197,7 @@ It costs one dependency, and buys correct system-back behaviour and
 screen switching gets both of those wrong by default.
 
 Unlike the sibling, the top bar is **not** hoisted into `AppScaffold`. The board
-needs a FAB and a "stop all" action that the other two screens have no use for,
+needs a FAB and a "stop all" action that the other screens have no use for,
 and hoisting would mean threading `SoundboardViewModel` up past screens that
 don't want it. Each screen renders its own `DrawerScaffold` instead, which is
 the shared top bar plus a hamburger, with slots for whatever chrome that screen

@@ -59,7 +59,7 @@ Four layers, each with one job:
   a separate row from `SoundRow`, not a shared one; see `DECISIONS.md`),
   `components/VolumeDial`, `components/RenameDialog`, `components/AppScaffold` (drawer),
   `components/DrawerScaffold` (shared top bar), `navigation/`, `about/`,
-  `theme/`.
+  `help/`, `theme/`.
 - `SoundboardApp` — the composition root; owns the engine and repository.
 
 ## Audio Rules

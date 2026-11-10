@@ -172,8 +172,8 @@ fun SoundRow(
 internal fun SoundNameText(
     name: String,
     onClick: () -> Unit,
-    onLongPress: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onLongPress: (() -> Unit)? = null,
 ) {
     var truncated by remember(name) { mutableStateOf(false) }
     val tooltipState = rememberTooltipState()

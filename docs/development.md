@@ -61,8 +61,12 @@ adb shell am start -n dev.co508.soundboard.debug/dev.co508.soundboard.MainActivi
 The unit tests cover pure logic only. The parts that matter most to this app
 need a real device or emulator with audio, and are checked by hand:
 
-- **Simultaneous playback** — start three sounds; all three should be audible
-  and loop without a gap at the loop point.
+- **Simultaneous playback** — start three sounds; all three should be audible.
+- **Play once, loop, pause** — a first tap plays once, a second switches to
+  looping without a restart or gap, and a third pauses. A one-shot that ends
+  returns to a stopped row and starts from the beginning on the next tap. When
+  the last one-shot ends, audio focus is abandoned and the notification
+  disappears. Pause and resume a looping sound: it should resume playing once.
 - **Independent volume** — change one sound's percentage while others play;
   only that sound's level should move. Then change the device's media volume;
   all sounds should move together, keeping their relative balance.
