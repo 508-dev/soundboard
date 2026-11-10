@@ -29,6 +29,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +71,13 @@ fun SoundboardScreen(
     // `ReorderableSoundList` for why it's a separate row rather than teaching
     // long-press to mean two different things.
     var rearranging by remember { mutableStateOf(false) }
+
+    // Deleting the last sound from rearrange mode would otherwise strand the
+    // user: the Done toggle only shows while there are rows, and the add FAB
+    // is hidden while rearranging. Drop back to the board instead.
+    LaunchedEffect(rows.isEmpty()) {
+        if (rows.isEmpty()) rearranging = false
+    }
 
     // ACTION_OPEN_DOCUMENT, not GET_CONTENT: only the former yields a URI whose
     // read permission can be persisted across reboots. The "multiple" variant
