@@ -21,7 +21,8 @@ data class SoundRowState(
     val sound: Sound,
     val status: PlaybackStatus,
 ) {
-    val isPlaying: Boolean get() = status == PlaybackStatus.PLAYING
+    val isPlaying: Boolean get() = status.isPlaying
+    val isLooping: Boolean get() = status == PlaybackStatus.LOOPING
     val isUnavailable: Boolean get() = status == PlaybackStatus.UNAVAILABLE
 }
 
@@ -37,7 +38,7 @@ class SoundboardViewModel(
     /** True while anything is audible; the screen uses it to offer "Stop all". */
     val anyPlaying: StateFlow<Boolean> =
         engine.statuses
-            .map { statuses -> statuses.any { it.value == PlaybackStatus.PLAYING } }
+            .map { statuses -> statuses.any { it.value.isPlaying } }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
 
     fun toggle(sound: Sound) = engine.toggle(sound)

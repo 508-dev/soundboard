@@ -158,13 +158,22 @@ The notification therefore reports a count ("3 sounds playing") with a single
 lives. Playback continues if the user denies `POST_NOTIFICATIONS`; only the
 notification and its Stop All are withheld.
 
-## Sounds Loop Until Paused
+## Three-Stage Playback: Once, Loop, Pause
 
-Each sound loops (`REPEAT_MODE_ONE`) rather than playing once. The product is a
-soundscape mixer — rain plus a fan plus a café — where one-shot playback would
-make the play/pause toggle and the per-sound volume mixing pointless. A per-sound
-one-shot/loop toggle is a plausible later addition to the long-press sheet, which
-is why that sheet exists as a list rather than a single Delete button.
+Each sound starts in `REPEAT_MODE_OFF`. Tapping a playing-once row switches its
+existing player to `REPEAT_MODE_ONE` without restarting it, and tapping a
+looping row pauses it. This makes short effects useful without giving up the
+soundscape mixer — rain plus a fan plus a café — and avoids a separate mode
+toggle whose state the user would have to check before pressing play. A paused
+sound always resumes into the once/loop/pause cycle, so an old looping choice
+cannot surprise the user on a later tap.
+
+`PLAYING` and `LOOPING` are separate transient statuses, both counted as audible
+by focus handling, Stop All, and the foreground service. Reaching `STATE_ENDED`
+in one-shot mode returns the row to `IDLE` and runs the same silence handling as
+pause, so the last ended sound abandons audio focus and stops the service. Focus
+loss remembers which of the two playing stages each sound was in; the player's
+repeat mode is left untouched while paused and restored with it on focus gain.
 
 ## Whole Row Toggles Playback
 

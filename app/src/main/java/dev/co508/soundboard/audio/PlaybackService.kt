@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
- * Keeps the process alive while sounds are looping, and shows the one
+ * Keeps the process alive while sounds are playing, and shows the one
  * notification Android requires in exchange.
  *
  * This service does **not** own the players — [SoundboardEngine] does, from the
@@ -43,7 +43,7 @@ class PlaybackService : Service() {
         createChannel()
         scope.launch {
             engine.statuses
-                .map { statuses -> statuses.count { it.value == PlaybackStatus.PLAYING } }
+                .map { statuses -> statuses.count { it.value.isPlaying } }
                 .collect { playingCount ->
                     if (playingCount == 0) {
                         stopSelf()
@@ -65,7 +65,7 @@ class PlaybackService : Service() {
 
         // Android gives us ~5s from startForegroundService() to get here, so
         // promote first and let the collector above refine the text after.
-        val playingCount = engine.statuses.value.count { it.value == PlaybackStatus.PLAYING }
+        val playingCount = engine.statuses.value.count { it.value.isPlaying }
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
