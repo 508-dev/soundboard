@@ -127,7 +127,13 @@ fun SoundboardScreen(
             )
         } else {
             LazyColumn(
-                contentPadding = PaddingValues(16.dp),
+                contentPadding =
+                    PaddingValues(
+                        start = BOARD_CONTENT_PADDING,
+                        top = BOARD_CONTENT_PADDING,
+                        end = BOARD_CONTENT_PADDING,
+                        bottom = BOARD_CONTENT_PADDING + FAB_SIZE + FAB_BOTTOM_MARGIN,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize().padding(padding),
             ) {
@@ -234,3 +240,6 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 }
 
 private const val AUDIO_MIME_TYPE = "audio/*"
+private val BOARD_CONTENT_PADDING = 16.dp
+private val FAB_SIZE = 56.dp
+private val FAB_BOTTOM_MARGIN = 16.dp
