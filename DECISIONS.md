@@ -40,7 +40,7 @@ plus two gesture detectors rather than a custom `View` subclass.
 
 ## Media3 ExoPlayer, One Player Per Sound
 
-The product requirement is *N* sounds looping simultaneously, each with its own
+The product requirement is *N* sounds playing simultaneously, each with its own
 volume, each independently startable and stoppable. Options considered:
 
 - **`SoundPool`** — built for exactly this shape (many simultaneous streams,

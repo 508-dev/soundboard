@@ -96,7 +96,6 @@ fun SoundRow(
             Column(modifier = Modifier.weight(1f)) {
                 SoundNameText(
                     name = row.sound.name,
-                    onClick = onToggle,
                     onLongPress = onLongPress,
                 )
                 if (row.isLooping) {
@@ -171,7 +170,6 @@ fun SoundRow(
 @Composable
 internal fun SoundNameText(
     name: String,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongPress: (() -> Unit)? = null,
 ) {
@@ -184,6 +182,7 @@ internal fun SoundNameText(
         tooltip = { PlainTooltip { Text(name) } },
         state = tooltipState,
         modifier = modifier,
+        enableUserInput = false,
     ) {
         Text(
             text = name,
@@ -192,16 +191,15 @@ internal fun SoundNameText(
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { truncated = it.hasVisualOverflow },
             modifier =
-                Modifier.combinedClickable(
-                    onClick = {
-                        if (truncated) {
-                            scope.launch { tooltipState.show() }
-                        } else {
-                            onClick()
-                        }
-                    },
-                    onLongClick = onLongPress,
-                ),
+                if (truncated) {
+                    Modifier.combinedClickable(
+                        onClickLabel = stringResource(R.string.show_full_name),
+                        onClick = { scope.launch { tooltipState.show() } },
+                        onLongClick = onLongPress,
+                    )
+                } else {
+                    Modifier
+                },
         )
     }
 }

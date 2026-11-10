@@ -10,6 +10,7 @@
     <string name="loop">Loop</string>
     <string name="looping">Looping</string>
     <string name="pause">Pause</string>
+    <string name="show_full_name">Show full name</string>
     <string name="unavailable">File unavailable</string>
     <string name="unavailable_body">Moved, renamed, deleted, or access was revoked.</string>
 

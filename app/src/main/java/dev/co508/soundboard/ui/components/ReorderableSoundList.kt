@@ -275,7 +275,6 @@ private fun ReorderableSoundRow(
             )
             SoundNameText(
                 name = row.sound.name,
-                onClick = {},
                 modifier = Modifier.weight(1f),
             )
             IconButton(onClick = onEdit) {
