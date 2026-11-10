@@ -20,13 +20,24 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.co508.soundboard.R
 import dev.co508.soundboard.ui.SoundRowState
+import kotlinx.coroutines.launch
 
 /**
  * One full-width rounded row: name on the left, volume percent and a
@@ -77,11 +89,10 @@ fun SoundRow(
             modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = row.sound.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                SoundNameText(
+                    name = row.sound.name,
+                    onClick = onToggle,
+                    onLongPress = onLongPress,
                 )
                 if (row.isUnavailable) {
                     Text(
@@ -118,6 +129,46 @@ fun SoundRow(
                 )
             }
         }
+    }
+}
+
+/** Shows an ellipsized sound's full name on tap; otherwise behaves like its row. */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+internal fun SoundNameText(
+    name: String,
+    onClick: () -> Unit,
+    onLongPress: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
+    var truncated by remember(name) { mutableStateOf(false) }
+    val tooltipState = rememberTooltipState()
+    val scope = rememberCoroutineScope()
+
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(name) } },
+        state = tooltipState,
+        modifier = modifier,
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { truncated = it.hasVisualOverflow },
+            modifier =
+                Modifier.combinedClickable(
+                    onClick = {
+                        if (truncated) {
+                            scope.launch { tooltipState.show() }
+                        } else {
+                            onClick()
+                        }
+                    },
+                    onLongClick = onLongPress,
+                ),
+        )
     }
 }
 

@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import dev.co508.soundboard.R
@@ -274,11 +273,9 @@ private fun ReorderableSoundRow(
                             )
                         },
             )
-            Text(
-                text = row.sound.name,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            SoundNameText(
+                name = row.sound.name,
+                onClick = {},
                 modifier = Modifier.weight(1f),
             )
             IconButton(onClick = onEdit) {
