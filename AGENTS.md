@@ -49,17 +49,22 @@
 
 Four layers, each with one job:
 
-- `data/` — `Sound`, `SoundLibrary` (pure, testable list operations),
-  `SoundLibrarySerializer`, `SoundRepository` (DataStore + SAF permissions).
+- `data/` — `Sound`, `Category` (a name plus an ordered list of sound ids —
+  never a copy of a sound), `SoundLibrary` (pure, testable list and category
+  operations), `SoundLibrarySerializer`, `SoundRepository` (DataStore + SAF
+  permissions).
 - `audio/` — `SoundboardEngine` (one ExoPlayer per sound, the mixer),
   `AudioFocusHolder` (one focus request for the whole app), `PlaybackService`
   (foreground lifetime + notification), `PlaybackStatus`.
 - `ui/` — `SoundboardViewModel`, `SoundboardScreen`, `components/SoundRow`,
   `components/ReorderableSoundList` (rearrange mode's drag-to-reorder list —
   a separate row from `SoundRow`, not a shared one; see `DECISIONS.md`),
-  `components/VolumeDial`, `components/RenameDialog`, `components/AppScaffold` (drawer),
-  `components/DrawerScaffold` (shared top bar), `navigation/`, `about/`,
-  `help/`, `theme/`.
+  `components/VolumeDial`, `components/NameDialog` (names a sound or a
+  category), `components/CategorySwitcher` (the top bar's title, its picker
+  sheet, and per-category rename/delete), `components/CategoryMembership`
+  (a sound's category checklist, and add-from-library),
+  `components/AppScaffold` (drawer), `components/DrawerScaffold` (shared top
+  bar), `navigation/`, `about/`, `help/`, `theme/`.
 - `SoundboardApp` — the composition root; owns the engine and repository.
 
 ## Audio Rules
@@ -84,6 +89,11 @@ change. Read `DECISIONS.md` before working in `audio/`.
 ## Editing Rules
 
 - Read target files, callers, and existing tests before editing.
+- **A sound is deleted in two different senses.** `removeFromCategory`
+  ungroups it and must leave the player and URI grant alone; `remove` deletes
+  it and must release both and prune every category. Don't route one through
+  the other — see `DECISIONS.md` → "Categories Are Ordered Id Lists, Not
+  Copies".
 - Keep edits surgical. Do not reformat unrelated files.
 - Add or update tests (`app/src/test/`) when behavior changes.
 - Update `docs/` when changing developer workflows or dependency pins.

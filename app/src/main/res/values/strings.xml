@@ -30,6 +30,35 @@
     <string name="sort_by_volume">Volume</string>
     <string name="sort_by_playing">Playing</string>
 
+    <!-- Categories -->
+    <string name="category_all">All sounds</string>
+    <string name="category_switch">Switch category</string>
+    <string name="category_sheet_title">Categories</string>
+    <string name="category_new">New category</string>
+    <string name="category_new_title">New category</string>
+    <string name="category_rename">Rename category</string>
+    <string name="category_rename_title">Rename category</string>
+    <string name="category_delete">Delete category</string>
+    <string name="category_delete_title">Delete “%1$s”?</string>
+    <string name="category_delete_message">This deletes the category only. Its sounds stay on your board under All sounds, and no audio files are touched.</string>
+    <string name="category_selected">Selected</string>
+    <string name="category_manage_hint">Long-press a category to rename or delete it.</string>
+    <plurals name="category_sound_count">
+        <item quantity="one">%1$d sound</item>
+        <item quantity="other">%1$d sounds</item>
+    </plurals>
+    <string name="sound_categories">Categories</string>
+    <string name="sound_categories_title">Add to categories</string>
+    <string name="sound_categories_none">You have no categories yet. Create one, then you can add sounds to it.</string>
+    <string name="add_from_library">Add from library</string>
+    <string name="add_from_library_title">Add existing sounds</string>
+    <string name="add_from_library_confirm">Add</string>
+    <string name="add_from_library_empty">Every sound on your board is already in this category.</string>
+    <string name="remove_from_category">Remove from this category</string>
+    <string name="delete_sound">Delete sound</string>
+    <string name="empty_category_title">Nothing in this category</string>
+    <string name="empty_category_body">Tap + to pick new audio files straight into this category, or use Add from library to bring in sounds you already have.</string>
+
     <!-- Rename -->
     <string name="edit">Edit</string>
     <string name="rename_title">Rename sound</string>
@@ -61,13 +90,25 @@
     <string name="how_to_volume_title">Volume</string>
     <string name="how_to_volume_body">Tap a row’s percentage button to open its volume dial. Tap or drag around the ring to choose a level from 0 to 100 percent; the change is audible while you adjust it. Done, or closing the dialog, saves the setting. Zero silences that sound.\n\nThe percentage is relative to Android’s media volume. Your device’s volume buttons still raise or lower the whole mix together, while each sound keeps its own balance within that mix.</string>
     <string name="how_to_stop_all_title">Stop all</string>
-    <string name="how_to_stop_all_body">While anything is playing, the top bar shows Stop all. It pauses every play-once and looping sound without removing any rows. The playback notification has a Stop all action that does the same thing. Start a row again to resume it in the play-once stage.</string>
+    <string name="how_to_stop_all_body">While anything is playing, the top bar shows Stop all. It pauses every play-once and looping sound without removing any rows, including sounds in categories you are not currently looking at. The playback notification has a Stop all action that does the same thing. Start a row again to resume it in the play-once stage.</string>
     <string name="how_to_background_title">Background playback and the notification</string>
     <string name="how_to_background_body">Playback continues when you leave the app or turn off the screen. The ongoing notification shows how many sounds are currently playing, including both play-once and looping sounds, and tapping it opens the board. One-shot sounds stop counting when they end.\n\nIf you deny notification permission, playback still works, but Android withholds the notification and its Stop all action.</string>
     <string name="how_to_focus_title">Calls and other audio apps</string>
     <string name="how_to_focus_body">When another app or a call takes audio focus, Soundboard may lower the whole mix or pause it. Lowering the volume does not change your per-sound percentages, and the previous level returns with audio focus. Sounds paused by a temporary interruption resume when focus returns, keeping their play-once or looping stage. A permanent focus loss leaves everything paused; tap each sound you want to start again.</string>
     <string name="how_to_options_title">Rename and delete</string>
     <string name="how_to_options_body">Long-press a row on the normal board to open its options. Edit opens the rename dialog; type a non-blank name and tap Save. Delete asks for confirmation and removes the sound only from your board. It never deletes the audio file from your device. In rearrange mode, use the row’s edit and delete icons for the same actions.</string>
+    <string name="how_to_categories_title">Categories</string>
+    <string name="how_to_categories_body">The title at the top of the board is also a switcher: tap it to see All sounds and every category you have made, each with how many sounds are in it. Tap one to show only its sounds. New category makes an empty one and opens it.
+
+All sounds always shows everything on your board, so nothing can go missing by being filed away. Each category keeps its own arrangement, so the same sounds can sit in a different order in each one.
+
+Long-press a category in the switcher to rename or delete it. Deleting a category deletes only the grouping — its sounds stay on your board under All sounds, and no audio file is ever touched.</string>
+    <string name="how_to_categories_add_title">Putting sounds in categories</string>
+    <string name="how_to_categories_add_body">A sound can be in as many categories as you like, and it is stored only once however many it is in. Long-press a sound and choose Categories to tick every category it should belong to, then Save.
+
+While a category is open, + adds newly picked files straight into it, and the Add from library button in the top bar brings in sounds you already have. If you pick a file that is already on your board, it joins the open category rather than being added twice.
+
+Inside a category, a sound\'s options offer two different removals. Remove from this category just ungroups it: the sound stays on your board, in any other category it belongs to, and keeps playing if it was playing. Delete sound asks for confirmation and removes it everywhere. Under All sounds there is only Delete sound.</string>
     <string name="how_to_rearrange_title">Rearranging the board</string>
     <string name="how_to_rearrange_body">Tap the rearrange icon in the top bar to enter rearrange mode. Drag a row’s handle to move it, or use the sort shortcuts: Name sorts alphabetically, Volume puts louder percentages first, and Playing puts currently playing sounds first. A shortcut applies a new order once, and you can still drag rows afterward.\n\nTap-to-play and the add + button are unavailable while rearranging. Tap Done to return to the normal board.</string>
     <string name="how_to_long_names_title">Reading long sound names</string>

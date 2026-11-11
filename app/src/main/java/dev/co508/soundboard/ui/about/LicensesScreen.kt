@@ -85,9 +85,9 @@ fun LicensesScreen(
     val openUrl = rememberUrlOpener()
 
     DrawerScaffold(
-        titleRes = R.string.nav_licenses,
         onOpenDrawer = onOpenDrawer,
         modifier = modifier,
+        title = { Text(stringResource(R.string.nav_licenses)) },
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
             item {

@@ -12,7 +12,6 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 /**
@@ -26,7 +25,13 @@ class SoundRepository(
     private val store: DataStore<SoundLibrary>,
     private val contentResolver: ContentResolver,
 ) {
-    val sounds: Flow<List<Sound>> = store.data.map { it.sounds }
+    /**
+     * The whole document, not just the sound list: the ViewModel needs sounds
+     * and categories together to resolve the selected category's rows, and
+     * splitting them into two flows would only let the two disagree for a
+     * frame.
+     */
+    val library: Flow<SoundLibrary> = store.data
 
     /**
      * Adds a picked document to the board, persisting read access to it.
@@ -45,7 +50,10 @@ class SoundRepository(
      * multi-select of thirty files, losing one shouldn't lose the other
      * twenty-nine.
      */
-    suspend fun add(uris: List<Uri>) {
+    suspend fun add(
+        uris: List<Uri>,
+        categoryId: String? = null,
+    ) {
         if (uris.isEmpty()) return
 
         val picked =
@@ -61,16 +69,23 @@ class SoundRepository(
 
         store.updateData { library ->
             picked.fold(library) { acc, (uri, name) ->
-                acc.withSound(id = UUID.randomUUID().toString(), uri = uri.toString(), name = name)
+                acc.withSound(
+                    id = UUID.randomUUID().toString(),
+                    uri = uri.toString(),
+                    name = name,
+                    categoryId = categoryId,
+                )
             }
         }
     }
 
     /**
-     * Drops a sound from the board and releases its URI permission.
+     * Drops a sound from the board entirely and releases its URI permission.
      *
      * The file itself is never deleted — that promise is in the confirmation
-     * dialog the UI shows before calling this.
+     * dialog the UI shows before calling this. Every category referencing the
+     * sound loses it too; see [SoundLibrary.withoutSound]. Use
+     * [removeFromCategory] for the reversible, category-scoped removal.
      */
     suspend fun remove(id: String) {
         val removed = store.data.first().find(id) ?: return
@@ -95,9 +110,70 @@ class SoundRepository(
         store.updateData { it.renamed(id, name) }
     }
 
-    /** Persists a new sound order — see [SoundLibrary.reordered]. */
+    /** Persists a new order for the main board — see [SoundLibrary.reordered]. */
     suspend fun reorder(order: List<String>) {
         store.updateData { it.reordered(order) }
+    }
+
+    /** Persists a new order within one category — see [SoundLibrary.categoryReordered]. */
+    suspend fun reorderCategory(
+        categoryId: String,
+        order: List<String>,
+    ) {
+        store.updateData { it.categoryReordered(categoryId, order) }
+    }
+
+    /** Creates an empty category and returns its new id, or null if [name] was blank. */
+    suspend fun createCategory(name: String): String? {
+        if (name.isBlank()) return null
+        val id = UUID.randomUUID().toString()
+        store.updateData { it.withCategory(id, name) }
+        return id
+    }
+
+    /**
+     * Deletes a category. Its sounds keep their files, URI grants, and places
+     * on the main board — only the grouping goes away.
+     */
+    suspend fun deleteCategory(id: String) {
+        store.updateData { it.withoutCategory(id) }
+    }
+
+    suspend fun renameCategory(
+        id: String,
+        name: String,
+    ) {
+        store.updateData { it.categoryRenamed(id, name) }
+    }
+
+    /** Files existing sounds under a category — see [SoundLibrary.withSoundsInCategory]. */
+    suspend fun addToCategory(
+        categoryId: String,
+        soundIds: List<String>,
+    ) {
+        store.updateData { it.withSoundsInCategory(categoryId, soundIds) }
+    }
+
+    /**
+     * Takes a sound out of one category without deleting it.
+     *
+     * Deliberately does **not** release the URI permission or touch the engine:
+     * the sound is still on the main board and may still be playing. That
+     * asymmetry with [remove] is the whole point of having both.
+     */
+    suspend fun removeFromCategory(
+        categoryId: String,
+        soundId: String,
+    ) {
+        store.updateData { it.withoutSoundInCategory(categoryId, soundId) }
+    }
+
+    /** Sets a sound's full category membership in one write — see [SoundLibrary.withSoundCategories]. */
+    suspend fun setSoundCategories(
+        soundId: String,
+        categoryIds: Set<String>,
+    ) {
+        store.updateData { it.withSoundCategories(soundId, categoryIds) }
     }
 
     private fun releaseUriPermission(uri: Uri) {

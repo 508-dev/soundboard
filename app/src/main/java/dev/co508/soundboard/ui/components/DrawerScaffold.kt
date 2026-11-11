@@ -2,7 +2,6 @@ package dev.co508.soundboard.ui.components
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -13,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,22 +27,26 @@ import dev.co508.soundboard.R
  *
  * [actions] and [floatingActionButton] are open so the soundboard can add its
  * "stop all" control and `+` button without the other screens carrying either.
+ *
+ * [title] is a slot rather than a string resource because the board's title is
+ * the category switcher — a tappable label with a caret — while every other
+ * screen passes plain text.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerScaffold(
-    @StringRes titleRes: Int,
     onOpenDrawer: () -> Unit,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
+    title: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(titleRes)) },
+                title = title,
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
                         Icon(

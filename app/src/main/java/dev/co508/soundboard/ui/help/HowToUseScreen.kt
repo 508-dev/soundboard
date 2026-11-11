@@ -24,9 +24,9 @@ fun HowToUseScreen(
     modifier: Modifier = Modifier,
 ) {
     DrawerScaffold(
-        titleRes = R.string.nav_how_to_use,
         onOpenDrawer = onOpenDrawer,
         modifier = modifier,
+        title = { Text(stringResource(R.string.nav_how_to_use)) },
     ) { padding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -45,6 +45,8 @@ fun HowToUseScreen(
             HowToUseSection(R.string.how_to_background_title, R.string.how_to_background_body)
             HowToUseSection(R.string.how_to_focus_title, R.string.how_to_focus_body)
             HowToUseSection(R.string.how_to_options_title, R.string.how_to_options_body)
+            HowToUseSection(R.string.how_to_categories_title, R.string.how_to_categories_body)
+            HowToUseSection(R.string.how_to_categories_add_title, R.string.how_to_categories_add_body)
             HowToUseSection(R.string.how_to_rearrange_title, R.string.how_to_rearrange_body)
             HowToUseSection(R.string.how_to_long_names_title, R.string.how_to_long_names_body)
         }
