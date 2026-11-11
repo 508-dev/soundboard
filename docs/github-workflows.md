@@ -43,9 +43,12 @@ Not devkit defaults — these are specific to shipping this app, and
   Commit, since squash-merging makes it the commit subject release-please reads.
   Deliberately a plain regex rather than a third-party action — a release-gating
   check is a poor place to add a supply-chain dependency.
+- `.github/workflows/beta.yml`: publishes separately signed Soundboard Beta
+  pre-releases for non-main branches and cleans them up when a branch is
+  deleted. See `docs/beta-builds.md`.
 
-`release.yml` is the only workflow here that needs write permissions or
-secrets, and it scopes them per job.
+Only `release.yml` and `beta.yml` need write permissions or secrets. Release
+credentials are scoped to the `Prod` environment; beta uses its own key.
 
 ## Security Extras
 

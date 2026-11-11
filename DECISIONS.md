@@ -329,6 +329,32 @@ version, so an expression there ends automatic f-droid.org releases with no
 error anywhere. Generating literals into the file keeps both properties. CI runs
 `scripts/sync-version.sh --check` so the generated values cannot go stale.
 
+## Per-Branch Betas Have Their Own Identity And Key
+
+A beta from an arbitrary feature branch must install beside the shipping app,
+not replace it. The `beta` build type therefore adds the `.beta` application ID
+suffix and overrides the app name and launcher background. It otherwise
+inherits the release configuration, including R8 and resource shrinking, so a
+beta exercises the same build shape as production.
+
+Betas also have their own signing key. A workflow that runs for arbitrary
+branches must never have the release key, so the beta secrets are repository
+secrets and the release key stays in the untouched `Prod` environment. Losing
+the beta key only means beta users uninstall and reinstall; it cannot strand
+production installs. Local beta builds fall back to the debug key when no beta
+credentials are present.
+
+Every published beta gets a new `beta-<branch>-<run>` tag because Obtainium
+needs a new release to notice an update. The workflow's `run_number` becomes
+the beta `versionCode`: it increases across branches, unlike a number derived
+from a branch or commit, so each new APK can install over the last one. This is
+an output-level override only; the generated production literals in
+`defaultConfig` remain unchanged for F-Droid.
+
+The f-droid.org metadata now restricts `UpdateCheckMode` to tags matching
+`^soundboard-v`. Without that pattern its bot would also consider `beta-*`
+tags and could try to build a feature branch as a stable release.
+
 ## Two F-Droid Paths, Because Neither Alone Is Enough
 
 The app publishes to a self-hosted F-Droid repository on `gh-pages` *and* is

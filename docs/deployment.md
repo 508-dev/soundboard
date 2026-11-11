@@ -166,9 +166,10 @@ to it from GitHub Actions, ever. The interaction is a single merge request:
    [Quick Start guide](https://f-droid.org/docs/Submitting_to_F-Droid_Quick_Start_Guide/)
    — check their docs rather than trusting this file to stay current.
 
-Once merged, `UpdateCheckMode: Tags` makes their bot watch this repo for new
-`v*` tags and `AutoUpdateMode: Version` makes it read the version literals out
-of `app/build.gradle.kts` at that tag and add a build entry itself. From then
+Once merged, `UpdateCheckMode: Tags ^soundboard-v` makes their bot watch this
+repo for new stable release tags while ignoring `beta-*` tags.
+`AutoUpdateMode: Version` makes it read the version literals out of
+`app/build.gradle.kts` at that tag and add a build entry itself. From then
 on, tagging a release is the whole interaction. Expect days of lag: their build
 cycle is not ours.
 

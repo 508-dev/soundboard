@@ -133,7 +133,8 @@ track. Commit subjects are
 version.
 
 Full pipeline, versioning rules, signing, and one-time setup:
-[`docs/deployment.md`](docs/deployment.md).
+[`docs/deployment.md`](docs/deployment.md). Per-branch Soundboard Beta builds
+and Obtainium setup are covered in [`docs/beta-builds.md`](docs/beta-builds.md).
 
 ## License
 

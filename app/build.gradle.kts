@@ -42,6 +42,21 @@ val releaseSigning: Map<String, String>? =
             ?.mapValues { (_, value) -> value!! }
     }
 
+// Beta signing is deliberately independent of the release key. With no beta
+// credentials the build type falls back to the debug key for local compile checks.
+val betaSigning: Map<String, String>? =
+    mapOf(
+        "storeFile" to "SOUNDBOARD_BETA_KEYSTORE_FILE",
+        "storePassword" to "SOUNDBOARD_BETA_KEYSTORE_PASSWORD",
+        "keyAlias" to "SOUNDBOARD_BETA_KEY_ALIAS",
+        "keyPassword" to "SOUNDBOARD_BETA_KEY_PASSWORD",
+    ).mapValues { (_, name) -> providers.environmentVariable(name).orNull }
+        .takeIf { material -> material.values.none { it.isNullOrBlank() } }
+        ?.mapValues { (_, value) -> value!! }
+
+val betaVersionCode = providers.environmentVariable("SOUNDBOARD_BETA_VERSION_CODE").orNull?.toInt()
+val betaVersionName = providers.environmentVariable("SOUNDBOARD_BETA_VERSION_NAME").orNull
+
 android {
     namespace = "dev.co508.soundboard"
     compileSdk = 37
@@ -87,6 +102,19 @@ android {
         debug {
             applicationIdSuffix = ".debug"
         }
+        create("beta") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".beta"
+            signingConfig =
+                betaSigning?.let { material ->
+                    signingConfigs.create("beta") {
+                        storeFile = rootProject.file(material.getValue("storeFile"))
+                        storePassword = material.getValue("storePassword")
+                        keyAlias = material.getValue("keyAlias")
+                        keyPassword = material.getValue("keyPassword")
+                    }
+                } ?: signingConfigs.getByName("debug")
+        }
     }
 
     // Built-in Kotlin's jvmTarget defaults to targetCompatibility below, so
@@ -127,6 +155,17 @@ android {
         // spelling of this block).
         jniLibs {
             keepDebugSymbols += "**/*.so"
+        }
+    }
+}
+
+// Keep defaultConfig's generated literals untouched for F-Droid. CI overrides
+// only the beta outputs, using its monotonically increasing workflow run number.
+androidComponents {
+    onVariants(selector().withBuildType("beta")) { variant ->
+        variant.outputs.forEach { output ->
+            betaVersionCode?.let { output.versionCode.set(it) }
+            betaVersionName?.let { output.versionName.set(it) }
         }
     }
 }

@@ -1,0 +1,207 @@
+# Build an installable, separately signed app for every non-main branch.
+# Stable publishing stays in release.yml; see docs/beta-builds.md.
+name: Beta
+
+on:
+  push:
+    branches-ignore: [main, 'release-please--**', gh-pages]
+  delete:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: beta-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Compute the beta identity
+        id: identity
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          slug=$(
+            printf '%s' "$BRANCH" |
+              tr '[:upper:]' '[:lower:]' |
+              sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' |
+              cut -c1-40 |
+              sed -E 's/-+$//'
+          )
+          if [ -z "$slug" ]; then
+            echo "::error::Branch name has no characters usable in a beta tag."
+            exit 1
+          fi
+          version=$(tr -d '[:space:]' < version.txt)
+          short_sha=$(git rev-parse --short HEAD)
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "run=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "version_name=${version}-beta.${GITHUB_RUN_NUMBER}+${short_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Check beta signing configuration
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BETA_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BETA_KEYSTORE_BASE64 is not set; assembleBeta is a compile check and publishing is skipped."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compile a beta without publishing credentials
+        if: steps.signing.outputs.configured != 'true'
+        run: ./gradlew assembleBeta
+
+      - name: Restore the beta signing keystore
+        if: steps.signing.outputs.configured == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BETA_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.BETA_KEYSTORE_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d \
+            > "$RUNNER_TEMP/beta.keystore"
+          keytool -list -keystore "$RUNNER_TEMP/beta.keystore" \
+            -storepass "$KEYSTORE_PASSWORD" > /dev/null
+
+      - name: Build the signed beta APK
+        if: steps.signing.outputs.configured == 'true'
+        env:
+          SOUNDBOARD_BETA_KEYSTORE_FILE: ${{ runner.temp }}/beta.keystore
+          SOUNDBOARD_BETA_KEYSTORE_PASSWORD: ${{ secrets.BETA_KEYSTORE_PASSWORD }}
+          SOUNDBOARD_BETA_KEY_ALIAS: ${{ secrets.BETA_KEY_ALIAS }}
+          SOUNDBOARD_BETA_KEY_PASSWORD: ${{ secrets.BETA_KEY_PASSWORD }}
+          SOUNDBOARD_BETA_VERSION_CODE: ${{ steps.identity.outputs.run }}
+          SOUNDBOARD_BETA_VERSION_NAME: ${{ steps.identity.outputs.version_name }}
+        run: ./gradlew assembleBeta
+
+      - name: Verify the beta signature
+        if: steps.signing.outputs.configured == 'true'
+        run: |
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          "$build_tools/apksigner" verify --print-certs app/build/outputs/apk/beta/app-beta.apk
+
+      - name: Name the APK
+        if: steps.signing.outputs.configured == 'true'
+        id: artifact
+        env:
+          SLUG: ${{ steps.identity.outputs.slug }}
+          RUN: ${{ steps.identity.outputs.run }}
+        run: |
+          mkdir -p dist
+          apk="dist/soundboard-beta-${SLUG}-${RUN}.apk"
+          mv app/build/outputs/apk/beta/app-beta.apk "$apk"
+          echo "apk=$apk" >> "$GITHUB_OUTPUT"
+
+      - name: Write release notes
+        if: steps.signing.outputs.configured == 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          {
+            printf 'Branch: `%s`\n\n' "$BRANCH"
+            printf 'Commit: [`%s`](https://github.com/%s/commit/%s)\n\n' "$SHA" "$GITHUB_REPOSITORY" "$SHA"
+            printf 'Commits since `origin/main` (up to 30):\n\n```\n'
+            git log --oneline -n 30 origin/main..HEAD
+            printf '```\n\n'
+            printf 'Install the attached APK directly, or follow docs/beta-builds.md to receive beta updates through Obtainium.\n'
+          } > "$RUNNER_TEMP/beta-release-notes.md"
+
+      - name: Publish the beta pre-release
+        if: steps.signing.outputs.configured == 'true'
+        env:
+          TAG: beta-${{ steps.identity.outputs.slug }}-${{ steps.identity.outputs.run }}
+          TITLE: Beta ${{ steps.identity.outputs.run }}: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          APK: ${{ steps.artifact.outputs.apk }}
+        run: |
+          gh release create "$TAG" "$APK" \
+            --target "$SHA" \
+            --prerelease \
+            --latest=false \
+            --title "$TITLE" \
+            --notes-file "$RUNNER_TEMP/beta-release-notes.md"
+
+      - name: Delete older betas for this branch
+        if: steps.signing.outputs.configured == 'true'
+        env:
+          SLUG: ${{ steps.identity.outputs.slug }}
+          TAG: beta-${{ steps.identity.outputs.slug }}-${{ steps.identity.outputs.run }}
+        run: |
+          pattern="^beta-${SLUG}-[0-9]+$"
+          gh release list --limit 1000 --json tagName --jq '.[].tagName' |
+            while IFS= read -r tag; do
+              if [[ "$tag" =~ $pattern ]] && [ "$tag" != "$TAG" ]; then
+                gh release delete "$tag" --cleanup-tag -y
+              fi
+            done
+
+  # GitHub runs delete workflows from the default branch, so this cleanup only
+  # works once this workflow file has landed on main.
+  cleanup:
+    if: github.event_name == 'delete' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Compute the deleted branch slug
+        id: identity
+        env:
+          BRANCH: ${{ github.event.ref }}
+        run: |
+          slug=$(
+            printf '%s' "$BRANCH" |
+              tr '[:upper:]' '[:lower:]' |
+              sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' |
+              cut -c1-40 |
+              sed -E 's/-+$//'
+          )
+          if [ -z "$slug" ]; then
+            echo "No usable beta slug; nothing to clean up."
+            exit 0
+          fi
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Delete the branch's beta releases
+        if: steps.identity.outputs.slug != ''
+        env:
+          SLUG: ${{ steps.identity.outputs.slug }}
+        run: |
+          pattern="^beta-${SLUG}-[0-9]+$"
+          gh release list --limit 1000 --json tagName --jq '.[].tagName' |
+            while IFS= read -r tag; do
+              if [[ "$tag" =~ $pattern ]]; then
+                gh release delete "$tag" --cleanup-tag -y
+              fi
+            done
