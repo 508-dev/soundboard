@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+      # Explicit: the cleanup job has no checkout for gh to infer the repo from.
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
         with:
@@ -142,6 +144,8 @@ jobs:
           SHA: ${{ github.sha }}
           APK: ${{ steps.artifact.outputs.apk }}
         run: |
+          # A re-run keeps its run_number, so replace that run's release rather than fail.
+          gh release delete "$TAG" --cleanup-tag -y 2>/dev/null || true
           gh release create "$TAG" "$APK" \
             --target "$SHA" \
             --prerelease \
@@ -170,6 +174,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+      # Explicit: the cleanup job has no checkout for gh to infer the repo from.
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
         with:
