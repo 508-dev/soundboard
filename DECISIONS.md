@@ -40,7 +40,7 @@ plus two gesture detectors rather than a custom `View` subclass.
 
 ## Media3 ExoPlayer, One Player Per Sound
 
-The product requirement is *N* sounds looping simultaneously, each with its own
+The product requirement is *N* sounds playing simultaneously, each with its own
 volume, each independently startable and stoppable. Options considered:
 
 - **`SoundPool`** — built for exactly this shape (many simultaneous streams,
@@ -158,13 +158,22 @@ The notification therefore reports a count ("3 sounds playing") with a single
 lives. Playback continues if the user denies `POST_NOTIFICATIONS`; only the
 notification and its Stop All are withheld.
 
-## Sounds Loop Until Paused
+## Three-Stage Playback: Once, Loop, Pause
 
-Each sound loops (`REPEAT_MODE_ONE`) rather than playing once. The product is a
-soundscape mixer — rain plus a fan plus a café — where one-shot playback would
-make the play/pause toggle and the per-sound volume mixing pointless. A per-sound
-one-shot/loop toggle is a plausible later addition to the long-press sheet, which
-is why that sheet exists as a list rather than a single Delete button.
+Each sound starts in `REPEAT_MODE_OFF`. Tapping a playing-once row switches its
+existing player to `REPEAT_MODE_ONE` without restarting it, and tapping a
+looping row pauses it. This makes short effects useful without giving up the
+soundscape mixer — rain plus a fan plus a café — and avoids a separate mode
+toggle whose state the user would have to check before pressing play. A paused
+sound always resumes into the once/loop/pause cycle, so an old looping choice
+cannot surprise the user on a later tap.
+
+`PLAYING` and `LOOPING` are separate transient statuses, both counted as audible
+by focus handling, Stop All, and the foreground service. Reaching `STATE_ENDED`
+in one-shot mode returns the row to `IDLE` and runs the same silence handling as
+pause, so the last ended sound abandons audio focus and stops the service. Focus
+loss remembers which of the two playing stages each sound was in; the player's
+repeat mode is left untouched while paused and restored with it on focus gain.
 
 ## Whole Row Toggles Playback
 
@@ -174,11 +183,13 @@ easier target on a phone, and it makes the card's ripple mean something. The
 volume percentage and long-press gesture keep their own handling, so the row tap
 is unambiguous.
 
-## Navigation Drawer Over Three Flat Destinations
+## Navigation Drawer Over Flat Destinations
 
-The board, About, and Licenses are siblings with no hierarchy, so a
+The board, How to use, About, and Licenses are siblings with no hierarchy, so a
 `ModalNavigationDrawer` behind a hamburger is the right container — it scales to
-a Settings or Presets entry later without restructuring anything.
+a Settings or Presets entry later without restructuring anything. The guide is a
+destination rather than a dialog so its longer, scrollable prose has room and
+system-back behaviour matches the other screens.
 
 Classic `navigation-compose` rather than local state, matching the sibling app.
 It costs one dependency, and buys correct system-back behaviour and
@@ -186,7 +197,7 @@ It costs one dependency, and buys correct system-back behaviour and
 screen switching gets both of those wrong by default.
 
 Unlike the sibling, the top bar is **not** hoisted into `AppScaffold`. The board
-needs a FAB and a "stop all" action that the other two screens have no use for,
+needs a FAB and a "stop all" action that the other screens have no use for,
 and hoisting would mean threading `SoundboardViewModel` up past screens that
 don't want it. Each screen renders its own `DrawerScaffold` instead, which is
 the shared top bar plus a hamburger, with slots for whatever chrome that screen
@@ -328,6 +339,32 @@ from `versionName`. That was rejected: F-Droid's update bot regex-parses
 version, so an expression there ends automatic f-droid.org releases with no
 error anywhere. Generating literals into the file keeps both properties. CI runs
 `scripts/sync-version.sh --check` so the generated values cannot go stale.
+
+## Per-Branch Betas Have Their Own Identity And Key
+
+A beta from an arbitrary feature branch must install beside the shipping app,
+not replace it. The `beta` build type therefore adds the `.beta` application ID
+suffix and overrides the app name and launcher background. It otherwise
+inherits the release configuration, including R8 and resource shrinking, so a
+beta exercises the same build shape as production.
+
+Betas also have their own signing key. A workflow that runs for arbitrary
+branches must never have the release key, so the beta secrets are repository
+secrets and the release key stays in the untouched `Prod` environment. Losing
+the beta key only means beta users uninstall and reinstall; it cannot strand
+production installs. Local beta builds fall back to the debug key when no beta
+credentials are present.
+
+Every published beta gets a new `beta-<branch>-<run>` tag because Obtainium
+needs a new release to notice an update. The workflow's `run_number` becomes
+the beta `versionCode`: it increases across branches, unlike a number derived
+from a branch or commit, so each new APK can install over the last one. This is
+an output-level override only; the generated production literals in
+`defaultConfig` remain unchanged for F-Droid.
+
+The f-droid.org metadata now restricts `UpdateCheckMode` to tags matching
+`^soundboard-v`. Without that pattern its bot would also consider `beta-*`
+tags and could try to build a feature branch as a stable release.
 
 ## Two F-Droid Paths, Because Neither Alone Is Enough
 

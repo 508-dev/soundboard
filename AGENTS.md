@@ -20,8 +20,8 @@
   `docs/development.md` for setup.
 - Treat `keystore.properties` (gitignored, see `keystore.properties.example`)
   as a secret. Never print its contents or commit a real one. The same goes for
-  any `SOUNDBOARD_KEYSTORE_*` or `FDROID_*` environment variable — those are how
-  CI passes the same key in.
+  any `SOUNDBOARD_KEYSTORE_*`, `SOUNDBOARD_BETA_KEYSTORE_*`, or `FDROID_*`
+  environment variable — those are how CI passes signing keys in.
 
 ## Repository Shape
 
@@ -59,7 +59,7 @@ Four layers, each with one job:
   a separate row from `SoundRow`, not a shared one; see `DECISIONS.md`),
   `components/VolumeDial`, `components/RenameDialog`, `components/AppScaffold` (drawer),
   `components/DrawerScaffold` (shared top bar), `navigation/`, `about/`,
-  `theme/`.
+  `help/`, `theme/`.
 - `SoundboardApp` — the composition root; owns the engine and repository.
 
 ## Audio Rules
@@ -106,8 +106,9 @@ change. Read `DECISIONS.md` before working in `audio/`.
 
 ## Release Rules
 
-Releases are automated end-to-end (`docs/deployment.md`). Three ways to break
-them that all compile and pass tests:
+Releases are automated end-to-end (`docs/deployment.md`), and non-main branches
+publish separate beta pre-releases (`docs/beta-builds.md`). Three ways to break
+releases that all compile and pass tests:
 
 - **Never hand-edit `versionCode`, `versionName`, `CHANGELOG.md`, or
   `.release-please-manifest.json`.** `version.txt` is the source of truth;

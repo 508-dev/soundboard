@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Mixes any number of looping sounds, each with its own gain.
+ * Mixes any number of one-shot or looping sounds, each with its own gain.
  *
  * One [ExoPlayer] per sound (see `DECISIONS.md` → "Media3 ExoPlayer, One Player
  * Per Sound"). Players are created on first play and retained while paused so
@@ -51,12 +51,12 @@ class SoundboardEngine(
     /** Multiplier applied to every player while another app has ducked us. */
     private var duckFactor = 1f
 
-    /** Sounds paused by focus loss, to be resumed if focus comes back. */
-    private val pausedByFocusLoss = mutableSetOf<String>()
+    /** Sounds and stages paused by focus loss, to be restored if focus comes back. */
+    private val pausedByFocusLoss = mutableMapOf<String, PlaybackStatus>()
 
     /** True while any sound is audible — drives the foreground service lifetime. */
     val isAnythingPlaying: Boolean
-        get() = _statuses.value.any { it.value == PlaybackStatus.PLAYING }
+        get() = _statuses.value.any { it.value.isPlaying }
 
     fun play(sound: Sound) {
         // A player that hit an error stays in that state and ignores play(),
@@ -67,8 +67,10 @@ class SoundboardEngine(
         val player = players.getOrPut(sound.id) { buildPlayer(sound) }
         gains[sound.id] = sound.gain
         player.volume = sound.gain * duckFactor
+        player.repeatMode = Player.REPEAT_MODE_OFF
         if (!focus.request()) return
         pausedByFocusLoss.remove(sound.id)
+        if (player.playbackState == Player.STATE_ENDED) player.seekToDefaultPosition()
         player.play()
         setStatus(sound.id, PlaybackStatus.PLAYING)
     }
@@ -86,7 +88,18 @@ class SoundboardEngine(
     }
 
     fun toggle(sound: Sound) {
-        if (_statuses.value[sound.id] == PlaybackStatus.PLAYING) pause(sound.id) else play(sound)
+        when ((_statuses.value[sound.id] ?: PlaybackStatus.IDLE).nextPlaybackAction()) {
+            PlaybackAction.PLAY_ONCE -> play(sound)
+            PlaybackAction.LOOP -> loop(sound.id)
+            PlaybackAction.PAUSE -> pause(sound.id)
+        }
+    }
+
+    /** Starts repeating a one-shot player without restarting or seeking it. */
+    private fun loop(id: String) {
+        val player = players[id] ?: return
+        player.repeatMode = Player.REPEAT_MODE_ONE
+        setStatus(id, PlaybackStatus.LOOPING)
     }
 
     /** Applies a new relative volume live, without interrupting playback. */
@@ -101,7 +114,7 @@ class SoundboardEngine(
     /** Pauses every sound. Backs the notification's "Stop all" action. */
     fun pauseAll() {
         _statuses.value
-            .filterValues { it == PlaybackStatus.PLAYING }
+            .filterValues { it.isPlaying }
             .keys
             .toList()
             .forEach(::pause)
@@ -141,10 +154,17 @@ class SoundboardEngine(
                     // one request for the whole engine. See AudioFocusHolder.
                     false,
                 )
-                repeatMode = Player.REPEAT_MODE_ONE
+                repeatMode = Player.REPEAT_MODE_OFF
                 setMediaItem(MediaItem.fromUri(sound.uri.toUri()))
                 addListener(
                     object : Player.Listener {
+                        override fun onPlaybackStateChanged(playbackState: Int) {
+                            if (playbackState != Player.STATE_ENDED) return
+                            pausedByFocusLoss.remove(sound.id)
+                            setStatus(sound.id, PlaybackStatus.IDLE)
+                            abandonFocusIfSilent()
+                        }
+
                         override fun onPlayerError(error: PlaybackException) {
                             setStatus(sound.id, PlaybackStatus.UNAVAILABLE)
                             abandonFocusIfSilent()
@@ -175,10 +195,9 @@ class SoundboardEngine(
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 // Remember what was playing so AUDIOFOCUS_GAIN can restore exactly that.
                 _statuses.value
-                    .filterValues { it == PlaybackStatus.PLAYING }
-                    .keys
-                    .forEach { id ->
-                        pausedByFocusLoss += id
+                    .filterValues { it.isPlaying }
+                    .forEach { (id, status) ->
+                        pausedByFocusLoss[id] = status
                         players[id]?.pause()
                         setStatus(id, PlaybackStatus.PAUSED)
                     }
@@ -188,9 +207,9 @@ class SoundboardEngine(
 
             AudioManager.AUDIOFOCUS_GAIN -> {
                 applyDuck(1f)
-                pausedByFocusLoss.toList().forEach { id ->
+                pausedByFocusLoss.toList().forEach { (id, status) ->
                     players[id]?.play()
-                    setStatus(id, PlaybackStatus.PLAYING)
+                    setStatus(id, status)
                 }
                 pausedByFocusLoss.clear()
             }

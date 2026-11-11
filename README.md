@@ -2,8 +2,8 @@
 
 ![Screenshot of main app screen](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
 
-An offline Android app for mixing looping sounds. Pick audio files from your
-device, play any number of them at the same time, and set each one's volume
+An offline Android app for mixing one-shot and looping sounds. Pick audio files
+from your device, play any number of them at the same time, and set each one's volume
 independently — rain under a fan under a café, at whatever balance you like.
 
 Free software (GPL-3), no account, no network calls, no telemetry.
@@ -14,8 +14,10 @@ Free software (GPL-3), no account, no network calls, no telemetry.
   multi-selection, so a whole folder of ambience lands in one go. The files
   themselves are never copied or moved — Soundboard just remembers where they
   are.
-- **Play any combination at once.** Each row has its own play/pause toggle, and
-  sounds loop until you stop them. Tapping anywhere on a row toggles it too.
+- **Play any combination at once.** The first tap plays a sound once, the next
+  switches it to looping without restarting it, and the next pauses it. Tapping
+  anywhere on a row advances the same cycle.
+- **Read long names** by tapping an ellipsized sound name to show it in full.
 - **Set each sound's volume** by tapping its volume pill, then dragging around
   the dial. The percentage is _relative_: your device's volume keys still move
   the whole mix together, and each sound keeps its balance within it.
@@ -23,6 +25,8 @@ Free software (GPL-3), no account, no network calls, no telemetry.
   how many sounds are running and offers "Stop all".
 - **Remove a sound** by long-pressing its row and choosing Delete. This only
   takes it off the board — your audio file is left exactly where it is.
+- **Open How to use** from the navigation drawer for the full guide, including
+  rearranging, audio focus, background playback, and missing files.
 
 ## Install
 
@@ -73,7 +77,8 @@ Full table and pinning policy: [`docs/tooling.md`](docs/tooling.md).
 ```
 
 Unit tests cover the pure logic — board mutations, persistence and its
-corruption handling, and the volume dial's angle→percent mapping. Playback,
+corruption handling, the playback-cycle decision, and the volume dial's
+angle→percent mapping. Playback,
 mixing, audio focus, and the foreground service need a real device; the manual
 pass is written up in
 [`docs/development.md`](docs/development.md#testing-audio-behavior).
@@ -90,8 +95,8 @@ Four small layers:
   Audio focus is requested once for the whole app rather than per player.
   `PlaybackService` is a foreground service that exists only to keep the process
   alive and show the notification.
-- **`ui/`** — a navigation drawer over three destinations (the board, About,
-  Licenses), a Compose list of cards, and the custom `Canvas` volume dial.
+- **`ui/`** — a navigation drawer over four destinations (the board, How to use,
+  About, Licenses), a Compose list of cards, and the custom `Canvas` volume dial.
 - **`SoundboardApp`** — the composition root. No DI framework.
 
 The reasoning behind each of those, and the options that were rejected, is in
@@ -133,7 +138,8 @@ track. Commit subjects are
 version.
 
 Full pipeline, versioning rules, signing, and one-time setup:
-[`docs/deployment.md`](docs/deployment.md).
+[`docs/deployment.md`](docs/deployment.md). Per-branch Soundboard Beta builds
+and Obtainium setup are covered in [`docs/beta-builds.md`](docs/beta-builds.md).
 
 ## License
 

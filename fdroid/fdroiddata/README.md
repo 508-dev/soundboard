@@ -17,13 +17,12 @@ instead.
 - **Nothing in this repo pushes to f-droid.org.** It builds and signs on its
   own infrastructure, on its own schedule, with its own key. This file is
   read once at merge time and from then on only by their bot.
-- **`UpdateCheckMode: Tags`** makes that bot watch this repo for new tags.
-  Deliberately no tag pattern after it, because our tags are not uniformly
-  shaped: release-please is configured with `package-name: soundboard`, so
-  every tag it cuts is component-prefixed — `soundboard-v0.1.2`, not `v0.1.2`.
-  Only `v0.1.0` is bare, because that one was tagged by hand to baseline
-  release-please before it had ever run. A pattern like `v*` would match the
-  hand-cut baseline and miss every real release since.
+- **`UpdateCheckMode: Tags ^soundboard-v`** makes that bot watch this repo for
+  new stable release tags and ignore the per-branch `beta-*` tags. release-please
+  is configured with `package-name: soundboard`, so every tag it cuts is
+  component-prefixed — `soundboard-v0.1.2`, not `v0.1.2`. Only `v0.1.0` is bare,
+  because that one was tagged by hand to baseline release-please before it had
+  ever run; the pattern deliberately excludes that historical baseline too.
 - **`AutoUpdateMode: Version`** (no tag pattern after it) makes it read
   `versionName`/`versionCode` out of `app/build.gradle.kts` at that tag and
   append a new `Builds:` entry itself — the reason those two values have to

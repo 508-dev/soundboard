@@ -18,15 +18,27 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,13 +48,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.co508.soundboard.R
+import dev.co508.soundboard.audio.PlaybackAction
+import dev.co508.soundboard.audio.nextPlaybackAction
 import dev.co508.soundboard.ui.SoundRowState
+import kotlinx.coroutines.launch
 
 /**
  * One full-width rounded row: name on the left, volume percent and a
- * play/pause toggle on the right.
+ * three-stage play-once/loop/pause button on the right.
  *
- * Tapping the body toggles playback too — the toggle button is the affordance,
+ * Tapping the body advances playback too — the button is the affordance,
  * but the whole card is a far easier target on a phone. Long-pressing opens the
  * options sheet.
  */
@@ -55,6 +70,8 @@ fun SoundRow(
     onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val nextAction = row.status.nextPlaybackAction()
+
     Card(
         shape = RoundedCornerShape(CORNER_RADIUS),
         colors =
@@ -77,12 +94,28 @@ fun SoundRow(
             modifier = Modifier.padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = row.sound.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                SoundNameText(
+                    name = row.sound.name,
+                    onLongPress = onLongPress,
                 )
+                if (row.isLooping) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Repeat,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.looping),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
                 if (row.isUnavailable) {
                     Text(
                         text = stringResource(R.string.unavailable),
@@ -112,12 +145,62 @@ fun SoundRow(
                 modifier = Modifier.size(48.dp),
             ) {
                 Icon(
-                    imageVector = if (row.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    imageVector =
+                        when (nextAction) {
+                            PlaybackAction.PLAY_ONCE -> Icons.Filled.PlayArrow
+                            PlaybackAction.LOOP -> Icons.Filled.Repeat
+                            PlaybackAction.PAUSE -> Icons.Filled.Pause
+                        },
                     contentDescription =
-                        stringResource(if (row.isPlaying) R.string.pause else R.string.play),
+                        stringResource(
+                            when (nextAction) {
+                                PlaybackAction.PLAY_ONCE -> R.string.play_once
+                                PlaybackAction.LOOP -> R.string.loop
+                                PlaybackAction.PAUSE -> R.string.pause
+                            },
+                        ),
                 )
             }
         }
+    }
+}
+
+/** Shows an ellipsized sound's full name on tap; otherwise behaves like its row. */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+internal fun SoundNameText(
+    name: String,
+    modifier: Modifier = Modifier,
+    onLongPress: (() -> Unit)? = null,
+) {
+    var truncated by remember(name) { mutableStateOf(false) }
+    val tooltipState = rememberTooltipState()
+    val scope = rememberCoroutineScope()
+
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(name) } },
+        state = tooltipState,
+        modifier = modifier,
+        enableUserInput = false,
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { truncated = it.hasVisualOverflow },
+            modifier =
+                if (truncated) {
+                    Modifier.combinedClickable(
+                        onClickLabel = stringResource(R.string.show_full_name),
+                        onClick = { scope.launch { tooltipState.show() } },
+                        onLongClick = onLongPress,
+                    )
+                } else {
+                    Modifier
+                },
+        )
     }
 }
 

@@ -6,8 +6,11 @@
     <string name="add_sound">Add sound</string>
     <string name="empty_title">No sounds yet</string>
     <string name="empty_body">Tap + to pick an audio file. It stays where it is — Soundboard only remembers where to find it.</string>
-    <string name="play">Play</string>
+    <string name="play_once">Play once</string>
+    <string name="loop">Loop</string>
+    <string name="looping">Looping</string>
     <string name="pause">Pause</string>
+    <string name="show_full_name">Show full name</string>
     <string name="unavailable">File unavailable</string>
     <string name="unavailable_body">Moved, renamed, deleted, or access was revoked.</string>
 
@@ -44,8 +47,31 @@
     <!-- Navigation -->
     <string name="nav_menu_content_description">Open navigation menu</string>
     <string name="nav_soundboard">Soundboard</string>
+    <string name="nav_how_to_use">How to use</string>
     <string name="nav_about">About</string>
     <string name="nav_licenses">Licenses</string>
+
+    <!-- How to use -->
+    <string name="how_to_add_title">Adding sounds</string>
+    <string name="how_to_add_body">Tap + on the Soundboard and choose one or more audio files in the system picker. You can select several at once instead of adding them one at a time. Soundboard keeps a reference to each file and permission to read it; it does not copy or move the file into app storage. Your audio stays in its original location.</string>
+    <string name="how_to_unavailable_title">Moved or missing files</string>
+    <string name="how_to_unavailable_body">If a file is moved, renamed, or deleted, or if Soundboard loses permission to read it, its row shows “File unavailable.” Restore the file or its access, then tap Play once to try again. You can also remove an unavailable row from the board without deleting the original file.</string>
+    <string name="how_to_playback_title">Play once, loop, and pause</string>
+    <string name="how_to_playback_body">Tap a sound’s row or its playback button to move through three stages. Play once starts a stopped sound, or resumes a paused one, without repeating. Loop switches a playing-once sound to looping without restarting it, and a Looping label appears on the row. Pause stops a looping sound at its current position. The button’s icon shows what the next tap will do.\n\nWhen a play-once sound reaches its end, the row returns to a stopped state and the next tap starts it from the beginning. Resuming a paused sound always uses play once, even if it was looping when paused. Any number of sounds can play together.</string>
+    <string name="how_to_volume_title">Volume</string>
+    <string name="how_to_volume_body">Tap a row’s percentage button to open its volume dial. Tap or drag around the ring to choose a level from 0 to 100 percent; the change is audible while you adjust it. Done, or closing the dialog, saves the setting. Zero silences that sound.\n\nThe percentage is relative to Android’s media volume. Your device’s volume buttons still raise or lower the whole mix together, while each sound keeps its own balance within that mix.</string>
+    <string name="how_to_stop_all_title">Stop all</string>
+    <string name="how_to_stop_all_body">While anything is playing, the top bar shows Stop all. It pauses every play-once and looping sound without removing any rows. The playback notification has a Stop all action that does the same thing. Start a row again to resume it in the play-once stage.</string>
+    <string name="how_to_background_title">Background playback and the notification</string>
+    <string name="how_to_background_body">Playback continues when you leave the app or turn off the screen. The ongoing notification shows how many sounds are currently playing, including both play-once and looping sounds, and tapping it opens the board. One-shot sounds stop counting when they end.\n\nIf you deny notification permission, playback still works, but Android withholds the notification and its Stop all action.</string>
+    <string name="how_to_focus_title">Calls and other audio apps</string>
+    <string name="how_to_focus_body">When another app or a call takes audio focus, Soundboard may lower the whole mix or pause it. Lowering the volume does not change your per-sound percentages, and the previous level returns with audio focus. Sounds paused by a temporary interruption resume when focus returns, keeping their play-once or looping stage. A permanent focus loss leaves everything paused; tap each sound you want to start again.</string>
+    <string name="how_to_options_title">Rename and delete</string>
+    <string name="how_to_options_body">Long-press a row on the normal board to open its options. Edit opens the rename dialog; type a non-blank name and tap Save. Delete asks for confirmation and removes the sound only from your board. It never deletes the audio file from your device. In rearrange mode, use the row’s edit and delete icons for the same actions.</string>
+    <string name="how_to_rearrange_title">Rearranging the board</string>
+    <string name="how_to_rearrange_body">Tap the rearrange icon in the top bar to enter rearrange mode. Drag a row’s handle to move it, or use the sort shortcuts: Name sorts alphabetically, Volume puts louder percentages first, and Playing puts currently playing sounds first. A shortcut applies a new order once, and you can still drag rows afterward.\n\nTap-to-play and the add + button are unavailable while rearranging. Tap Done to return to the normal board.</string>
+    <string name="how_to_long_names_title">Reading long sound names</string>
+    <string name="how_to_long_names_body">A name that does not fit on one line is shortened with an ellipsis. Tap the shortened name itself to see the full name in a tooltip; that tap does not change playback. If the name is not shortened, tapping it advances playback just like tapping the rest of the row. Long-pressing still opens the row’s options. The tooltip is also available in rearrange mode.</string>
 
     <!-- ===================================================================
          About page — TEMPLATE. Everything below marked TODO is placeholder
@@ -80,7 +106,7 @@
 
     <!-- Playback notification -->
     <string name="playback_channel_name">Playback</string>
-    <string name="playback_channel_description">Shown while sounds are looping, so playback keeps running in the background.</string>
+    <string name="playback_channel_description">Shown while sounds are playing, so playback keeps running in the background.</string>
     <string name="stop_all">Stop all</string>
     <plurals name="sounds_playing">
         <item quantity="one">%d sound playing</item>

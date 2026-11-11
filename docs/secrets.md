@@ -16,18 +16,23 @@ obtained.
 | `RELEASE_KEY_PASSWORD` | same value as `RELEASE_KEYSTORE_PASSWORD` — PKCS12 keystores have no separate key password | as above |
 | `PLAY_SERVICE_ACCOUNT_JSON` | Play Developer API service account, whole JSON file | Play is skipped; GitHub Releases and F-Droid still publish |
 | `RELEASE_PLEASE_TOKEN` | fine-grained PAT so the release PR triggers CI | falls back to `GITHUB_TOKEN`; the release PR arrives unchecked |
+| `BETA_KEYSTORE_BASE64` | the separate beta app signing key, `base64 -w0` of the keystore | beta CI only compiles; no pre-release is published |
+| `BETA_KEYSTORE_PASSWORD` | beta keystore password | as above |
+| `BETA_KEY_ALIAS` | key alias within the beta keystore | as above |
+| `BETA_KEY_PASSWORD` | same value as `BETA_KEYSTORE_PASSWORD` for a PKCS12 beta keystore | as above |
 
-The signing key is reused to sign the self-hosted F-Droid repository index. One
-key means one set of secrets to protect and rotate, at the cost of coupling two
-things that could have failed independently: rotating it invalidates the
-repository fingerprint users pinned *and* breaks app updates. Since both
-failures already require every user to re-add or reinstall, coupling them costs
-little. Split them if that ever stops being true.
+The release signing key is reused to sign the self-hosted F-Droid repository
+index. One key means one set of secrets to protect and rotate, at the cost of
+coupling two things that could have failed independently: rotating it
+invalidates the repository fingerprint users pinned *and* breaks app updates.
+Since both failures already require every user to re-add or reinstall, coupling
+them costs little. Split them if that ever stops being true.
 
-**The signing key cannot be rotated in practice.** Android refuses to update an
-installed app with a differently-signed APK. Losing the keystore or its password
-means every existing user has to uninstall and reinstall, losing their board.
-Back it up offline and off this machine.
+**The release signing key cannot be rotated in practice.** Android refuses to
+update an installed app with a differently-signed APK. Losing the keystore or
+its password means every existing user has to uninstall and reinstall, losing
+their board. Back it up offline and off this machine. The beta key is separate;
+losing it affects only Soundboard Beta installs (see `docs/beta-builds.md`).
 
 ## Release Signing Locally
 
@@ -40,7 +45,8 @@ Back it up offline and off this machine.
    same as any other leaked credential.
 
 Debug builds (`./gradlew assembleDebug`/`installDebug`) don't need any of
-this — they use Android's auto-generated debug keystore.
+this — they use Android's auto-generated debug keystore. Beta builds do the
+same when the `SOUNDBOARD_BETA_KEYSTORE_*` variables are absent.
 
 CI never writes a `keystore.properties`. It passes the same four values as
 `SOUNDBOARD_KEYSTORE_FILE`, `SOUNDBOARD_KEYSTORE_PASSWORD`,
@@ -59,7 +65,8 @@ one into an issue without the user scrubbing it first.
 ## Agent Notes
 
 - Never print the contents of `keystore.properties` or a keystore file, and
-  never echo a `SOUNDBOARD_KEYSTORE_*` or `FDROID_*` value in a workflow step.
+  never echo a `SOUNDBOARD_KEYSTORE_*`, `SOUNDBOARD_BETA_KEYSTORE_*`, or
+  `FDROID_*` value in a workflow step.
 - If a real `keystore.properties` or `.jks`/`.keystore` file shows up staged
   for commit, stop and flag it rather than committing it.
 - `scripts/fdroid-publish.sh` stages an `fdroid/config.yml` that resolves the

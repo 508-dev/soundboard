@@ -9,8 +9,8 @@ anything you point it at.
 
 * Add sounds with the + button. The system file picker accepts a
   multi-selection, so a whole folder of ambience lands in one go.
-* Play any combination at once. Each row has its own play/pause toggle, and
-  sounds loop until you stop them.
+* Play any combination at once. Tap a row to play once, tap again to loop,
+  and tap again to pause.
 * Set each sound's volume by tapping its volume pill and dragging around the
   dial. The percentage is relative: your device's volume keys still move the
   whole mix together, and each sound keeps its balance within it.
