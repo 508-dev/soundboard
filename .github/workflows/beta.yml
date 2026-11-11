@@ -140,7 +140,7 @@ jobs:
         if: steps.signing.outputs.configured == 'true'
         env:
           TAG: beta-${{ steps.identity.outputs.slug }}-${{ steps.identity.outputs.run }}
-          TITLE: Beta ${{ steps.identity.outputs.run }}: ${{ github.ref_name }}
+          TITLE: "Beta ${{ steps.identity.outputs.run }}: ${{ github.ref_name }}"
           SHA: ${{ github.sha }}
           APK: ${{ steps.artifact.outputs.apk }}
         run: |
