@@ -12,7 +12,10 @@ permissions:
   contents: write
 
 concurrency:
-  group: beta-${{ github.ref }}
+  # delete events run from the default branch, so github.ref is main for every
+  # deletion; key cleanups by the deleted ref instead, or deleting two branches
+  # at once cancels one of their cleanups.
+  group: beta-${{ github.event_name == 'delete' && format('deleted-{0}', github.event.ref) || github.ref }}
   cancel-in-progress: true
 
 jobs:
