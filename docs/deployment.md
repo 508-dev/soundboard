@@ -76,14 +76,14 @@ Run `./scripts/sync-version.sh` after changing `version.txt` by hand.
 
 ## Signing
 
-There are three signatures in play, and they are not interchangeable.
+There are two signatures in play: ours, and whatever Play App Signing holds.
 
 | Channel | Signed by | Interchangeable with |
 | --- | --- | --- |
 | GitHub Release APK | our release key | the self-hosted F-Droid repo, and Play if the same key was uploaded to Play App Signing |
 | Self-hosted F-Droid repo | our release key | as above |
 | Google Play | Play App Signing | only itself, unless we supplied the key |
-| f-droid.org | F-Droid's own key | nothing else |
+| f-droid.org | our release key, via reproducible builds | the GitHub Release APK and the self-hosted repo |
 
 Android refuses to update an installed app with a differently-signed APK, so a
 user moving between two channels with different keys has to uninstall first and
@@ -92,11 +92,14 @@ loses their board. Two consequences worth taking seriously:
 - **Upload our own key to Play App Signing** at app-creation time. Google
   otherwise generates the app signing key itself, and Play builds stop being
   interchangeable with the ones we publish. This choice is permanent.
-- **f-droid.org builds can never match.** F-Droid builds from source and signs
-  with its own key, by design. The way out is F-Droid's
-  [reproducible builds](https://f-droid.org/docs/Reproducible_Builds/) process,
-  where F-Droid verifies its build matches ours bit-for-bit and ships our
-  signature instead. Worth pursuing later; it is not a prerequisite.
+- **f-droid.org ships our signature only while builds stay reproducible.**
+  The `Binaries:` + `AllowedAPKSigningKeys:` pair in the fdroiddata metadata opts
+  into F-Droid's
+  [reproducible builds](https://f-droid.org/docs/Reproducible_Builds/) process:
+  F-Droid builds from source, checks its APK matches the GitHub Release APK
+  bit-for-bit, and publishes ours. If a release ever stops reproducing, that
+  version fails on their build server and is simply not published — it does not
+  fall back to F-Droid's key.
 
 CI gets the key from `RELEASE_KEYSTORE_BASE64` and friends (see
 `docs/secrets.md`) and passes them to Gradle as `SOUNDBOARD_KEYSTORE_*`
@@ -171,7 +174,14 @@ repo for new stable release tags while ignoring `beta-*` tags.
 `AutoUpdateMode: Version` makes it read the version literals out of
 `app/build.gradle.kts` at that tag and add a build entry itself. From then
 on, tagging a release is the whole interaction. Expect days of lag: their build
-cycle is not ours.
+cycle is not ours. A tag goes through three stages there, each on its own
+schedule. First their bot commits a `Builds:` entry to fdroiddata. Then a build
+cycle, which runs for about two days, builds and verifies it. Then a separate
+publish run updates the index. To see where a version is stuck, compare
+fdroiddata's `metadata/dev.co508.soundboard.yml` with
+<https://f-droid.org/api/v1/packages/dev.co508.soundboard>, and look for
+`["dev.co508.soundboard", <versionCode>]` in `successfulBuildIds` or
+`failedBuilds` of <https://f-droid.org/repo/status/build.json>.
 
 **Two things to verify before submitting**, because both would fail on their
 builder rather than ours:
