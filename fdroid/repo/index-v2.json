@@ -14,7 +14,7 @@
       }
     },
     "address": "https://508-dev.github.io/soundboard/fdroid/repo",
-    "timestamp": 1794392025000,
+    "timestamp": 1794906146000,
     "categories": {
       "Multimedia": {
         "name": {
@@ -26,13 +26,13 @@
   "packages": {
     "dev.co508.soundboard": {
       "metadata": {
-        "added": 1794392023000,
+        "added": 1794906145000,
         "categories": [
           "Multimedia"
         ],
         "changelog": "https://github.com/508-dev/soundboard/blob/HEAD/CHANGELOG.md",
         "issueTracker": "https://github.com/508-dev/soundboard/issues",
-        "lastUpdated": 1794392023000,
+        "lastUpdated": 1794906145000,
         "license": "GPL-3.0-only",
         "sourceCode": "https://github.com/508-dev/soundboard",
         "webSite": "https://508.dev",
@@ -74,12 +74,12 @@
         "preferredSigner": "d98c77e95f22bc3947fe86a705807720852cbacc8a40fa1c8c4d0814a7776267"
       },
       "versions": {
-        "214669bb2de7c4c4210b48ee59e3c1b2a26bcc3691351b0e90d0234b756c852c": {
-          "added": 1794392023000,
+        "7f02f941c95f4c0b47c79bcc48d0330aa7247b93072bd535add60e241b251efa": {
+          "added": 1794906145000,
           "file": {
-            "name": "/soundboard-0.2.0.apk",
-            "sha256": "214669bb2de7c4c4210b48ee59e3c1b2a26bcc3691351b0e90d0234b756c852c",
-            "size": 2223345
+            "name": "/soundboard-0.3.0.apk",
+            "sha256": "7f02f941c95f4c0b47c79bcc48d0330aa7247b93072bd535add60e241b251efa",
+            "size": 2252641
           },
           "manifest": {
             "nativecode": [
@@ -88,8 +88,8 @@
               "x86",
               "x86_64"
             ],
-            "versionName": "0.2.0",
-            "versionCode": 2000,
+            "versionName": "0.3.0",
+            "versionCode": 3000,
             "usesSdk": {
               "minSdkVersion": 26,
               "targetSdkVersion": 36
@@ -121,7 +121,7 @@
             ]
           },
           "whatsNew": {
-            "en-US": "Features:\n\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add an in-app how-to-use guide\n- add play-once and loop playback stages\n- add play-once and loop playback stages\n- add play-once and loop playback stages\n- add play-once and loop playback st"
+            "en-US": "Features:\n\n- group sounds into categories\n- group sounds into categories\n"
           }
         }
       }

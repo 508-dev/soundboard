@@ -25,9 +25,9 @@ RepoType: git
 Repo: https://github.com/508-dev/soundboard.git
 
 # Appended at publish time by scripts/fdroid-publish.sh.
-CurrentVersion: 0.2.0
-CurrentVersionCode: 2000
+CurrentVersion: 0.3.0
+CurrentVersionCode: 3000
 Builds:
-  - versionName: 0.2.0
-    versionCode: 2000
-    commit: v0.2.0
+  - versionName: 0.3.0
+    versionCode: 3000
+    commit: v0.3.0
