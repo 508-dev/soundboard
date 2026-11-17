@@ -262,6 +262,85 @@ and `AudioFocusRequest` natively, so there are no compat branches in the audio o
 notification code. targetSdk stays one below compileSdk until API 37's behaviour
 changes are reviewed.
 
+## Categories Are Ordered Id Lists, Not Copies
+
+Sounds needed grouping ("Background (Space)", "Combat") with one sound allowed
+in several groups at once. Three shapes were considered:
+
+- **A membership field on `Sound`** (`boardIds: Set<String>`). Compact, but a
+  sound carries no per-group position, so every group would have to borrow the
+  main board's order. Losing per-category arrangement defeats half the point:
+  a scene-ordered "Space" and an alphabetical board are the same sounds in two
+  orders.
+- **A separate library per category.** Duplicates the `Sound` record, so a
+  rename or a volume change in one place silently disagrees with the other,
+  and the same file holds several URI grants against Android's per-app cap.
+- **A category holding an ordered list of sound ids.** Chosen.
+  `SoundLibrary.sounds` stays the one copy of every sound; `Category.soundIds`
+  references into it.
+
+This keeps the cost flat. A category is a name plus one id per member — tens of
+bytes each — so ten categories over fifty sounds adds low tens of KB to a
+document already in that range, and nothing is duplicated on disk. More
+importantly `SoundboardEngine` keys players by `Sound.id`, so a sound in five
+categories is still *one* `ExoPlayer`: viewing a category allocates nothing, and
+a sound playing under "Space" correctly shows as playing under All sounds too,
+for free.
+
+The consequence worth stating is the one that bites: **there are now two
+removals, and they must not be confused.** `withoutSoundInCategory` is a
+reversible ungrouping that deliberately leaves the player and the URI grant
+alone, because the sound is still on the main board and may still be audible.
+`withoutSound` is the real delete and has to prune the id from every category or
+the document accumulates dangling references. `soundsIn` also resolves with
+`mapNotNull` so a reference that survives anyway degrades to a missing row
+rather than a crash — the same stance the serializer takes on malformed JSON.
+
+`categories` defaults to empty and the serializer already ignores unknown keys,
+so a library written before categories existed loads unchanged and one written
+after still opens in an older build. There is no migration step.
+
+**This is the revisit "DataStore Over Room" asked for** — it named "sounds gain
+cross-references or tags" as the trigger. DataStore still wins: the references
+go one way (category → ids), there are no queries, the whole document stays a
+few tens of KB and is rewritten atomically, and every operation remains a pure
+function on `SoundLibrary` that unit-tests with no Android runtime. Room would
+buy indexes and joins that nothing here asks for. Revisit again if a play
+history or cross-device sync arrives.
+
+## The Category Switcher Is The Title, Not The Drawer
+
+The first design put categories in the navigation drawer: a `+` on the
+"Soundboard" item, a caret to expand, and nested indented rows per category.
+It was dropped before being built, in favour of making the top bar's title a
+tappable switcher with a caret.
+
+The drawer version needed a nav route per category (`board/{id}`), which the
+flat `Destination` enum cannot express, and `saveState`/`restoreState` keys on
+destination id — so two categories sharing one route would restore each other's
+scroll position. It also crowded one drawer row with a leading icon, a caret, a
+label and a trailing `+`, needed a hand-rolled row because
+`NavigationDrawerItem` owns its own click and cannot carry a long-press, and
+needed the drawer sheet taught to scroll. And it hid the current category: you
+had to open the drawer to see where you were.
+
+As the title, the switcher is always visible and always says where you are,
+switching is plain state rather than navigation, and the drawer is untouched.
+The costs, both accepted: **the app name no longer appears on the board's top
+bar** (it would ellipsize to nothing beside a caret and two action icons, and
+the launcher and About page already say what app this is), and system back does
+not step between categories — switching is a filter, not a journey, so back
+still just leaves the app as it always did.
+
+The picker is a `ModalBottomSheet` rather than a `DropdownMenu` because its rows
+need a long-press for rename/delete, which `DropdownMenuItem` cannot carry, and
+because long-press-opens-a-sheet is already how a sound row's options work.
+
+The selected category is **not persisted**: a cold start opens All sounds. It
+survives rotation, because the ViewModel does. Reopening into a filtered view
+the user doesn't remember choosing reads as "my sounds are gone", and All sounds
+is the one view that is never empty when the board isn't.
+
 ## Reordering Is A Separate Mode, Not A Long-Press Overload
 
 The board already used long-press on a row to open the delete sheet. Adding

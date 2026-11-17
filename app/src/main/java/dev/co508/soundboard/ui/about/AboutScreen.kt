@@ -40,9 +40,9 @@ fun AboutScreen(
     modifier: Modifier = Modifier,
 ) {
     DrawerScaffold(
-        titleRes = R.string.nav_about,
         onOpenDrawer = onOpenDrawer,
         modifier = modifier,
+        title = { Text(stringResource(R.string.nav_about)) },
     ) { padding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),

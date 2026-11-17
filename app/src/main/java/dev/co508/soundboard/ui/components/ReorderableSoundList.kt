@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,10 +53,15 @@ import kotlinx.coroutines.launch
  * long-press-to-delete here, only a drag handle and an explicit delete icon, so
  * dragging never has to be disambiguated from another gesture on the same row.
  *
- * [rows] is the source of truth; [onReordered] is called once, with the whole
- * board's ids in their new order, when a drag or a sort shortcut completes —
+ * [rows] is the source of truth; [onReordered] is called once, with the visible
+ * rows' ids in their new order, when a drag or a sort shortcut completes —
  * matching the existing preview/commit split the volume dial uses, so each is
  * one DataStore write, not dozens.
+ *
+ * [categoryScoped] changes what the trailing icon means. Rearranging a category
+ * is a view of that category, so its remove button takes the sound *out of the
+ * category* — a trash can there would promise to delete a sound the user only
+ * wanted ungrouped. On All sounds it stays the real delete.
  */
 @Composable
 fun ReorderableSoundList(
@@ -64,6 +70,7 @@ fun ReorderableSoundList(
     onEdit: (Sound) -> Unit,
     onDelete: (Sound) -> Unit,
     modifier: Modifier = Modifier,
+    categoryScoped: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -147,6 +154,7 @@ fun ReorderableSoundList(
                     row = row,
                     onEdit = { onEdit(row.sound) },
                     onDelete = { onDelete(row.sound) },
+                    categoryScoped = categoryScoped,
                     onDragStart = {
                         draggingId = row.sound.id
                         dragOffset = 0f
@@ -237,6 +245,7 @@ private fun ReorderableSoundRow(
     row: SoundRowState,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    categoryScoped: Boolean,
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
     onDragEnd: () -> Unit,
@@ -284,7 +293,13 @@ private fun ReorderableSoundRow(
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
+                Icon(
+                    imageVector = if (categoryScoped) Icons.Filled.PlaylistRemove else Icons.Filled.Delete,
+                    contentDescription =
+                        stringResource(
+                            if (categoryScoped) R.string.remove_from_category else R.string.delete,
+                        ),
+                )
             }
         }
     }
