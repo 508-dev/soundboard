@@ -35,7 +35,7 @@ Free software (GPL-3), no account, no network calls, no telemetry.
 | [GitHub Releases](https://github.com/508-dev/soundboard/releases) | Signed APK plus its SHA-256, for side-loading.                                                                                         |
 | F-Droid, our repository                                           | Add `https://508-dev.github.io/soundboard/fdroid/repo` in F-Droid → Settings → Repositories. Same signature as the GitHub Release APK. |
 | Google Play                                                       | Coming once the listing is live.                                                                                                       |
-| f-droid.org                                                       | Coming once the submission is accepted. Built and signed by F-Droid, so it cannot be updated over a build from the channels above.     |
+| [f-droid.org](https://f-droid.org/packages/dev.co508.soundboard/) | Reproducible build carrying our signature, so it updates in place over the channels above. Lags a release by several days.             |
 
 ## Requirements
 

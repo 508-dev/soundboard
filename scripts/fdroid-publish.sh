@@ -91,7 +91,11 @@ fi
 
 # repo/status/ is fdroidserver's own run bookkeeping: it changes every run and
 # records absolute runner paths. Nothing serves it to clients.
-printf 'config.yml\n*.keystore\n*.jks\nrepo/status/\n' > "$pages/fdroid/.gitignore"
+# `!repo/*.apk` is load-bearing: the existing gh-pages branch was cut from main
+# rather than started as an orphan, so it carries main's root .gitignore and its
+# `*.apk` rule. Without the re-include, `git add fdroid/repo` below skips every
+# APK without a word, and the index ships pointing at files that 404.
+printf 'config.yml\n*.keystore\n*.jks\nrepo/status/\n!repo/*.apk\n' > "$pages/fdroid/.gitignore"
 # Staged config.yml resolves the signing passwords; fdroidserver refuses to be
 # quiet about group/world-readable permissions on it, and it is right to.
 chmod 600 "$pages/fdroid/config.yml"
@@ -141,8 +145,9 @@ with open(out, "w") as f:
 Signing fingerprint (SHA-256): <code>{fp}</code></p>
 <p>These builds are signed with the same key as the APKs attached to the
 project's GitHub Releases, so you can switch between the two without
-uninstalling. Builds from <em>f-droid.org</em> are signed by F-Droid instead and
-are not interchangeable with these.</p>
+uninstalling. The <em>f-droid.org</em> listing is a reproducible build that
+carries the same signature, so it is interchangeable too &mdash; it just picks
+up new versions several days later.</p>
 <p><a href="https://github.com/508-dev/soundboard">Source code</a> &middot; GPL-3.0</p>
 </html>
 """)
@@ -154,6 +159,12 @@ PY
 # the second line of defence that keeps it and any stray keystore out.
 git -C "$pages" add \
     index.html fdroid/.gitignore fdroid/repo fdroid/metadata
+# Adding a directory drops ignored files inside it silently, so prove the APK
+# the new index points at is actually going out with it.
+if ! git -C "$pages" ls-files --error-unmatch "fdroid/repo/$(basename "$apk")" >/dev/null 2>&1; then
+    echo "error: fdroid/repo/$(basename "$apk") is not staged; an ignore rule on gh-pages is swallowing it" >&2
+    exit 1
+fi
 if git -C "$pages" diff --cached --quiet; then
     echo "==> nothing changed, not pushing"
     exit 0
